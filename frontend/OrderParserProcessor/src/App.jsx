@@ -1,3 +1,15 @@
+import ListGroup from "./components/ListGroup";
+
 function App() {
-  return <h1>Hello World</h1>
+  let my_list = [
+    'Paris',
+    'New York',
+    'London',
+    'Warsaw'
+  ];
+  return (
+    <div><ListGroup my_list = {my_list} heading='cities' /></div>
+  );
 }
+
+export default App
