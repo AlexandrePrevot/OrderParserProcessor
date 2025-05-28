@@ -1,15 +1,7 @@
-import ListGroup from "./components/ListGroup";
+import MainLayout from "./pages/MainLayout"
 
 function App() {
-  let my_list = [
-    'Paris',
-    'New York',
-    'London',
-    'Warsaw'
-  ];
-  return (
-    <div><ListGroup my_list = {my_list} heading='cities' /></div>
-  );
+  return <MainLayout />
 }
 
 export default App
