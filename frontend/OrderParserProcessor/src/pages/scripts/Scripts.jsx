@@ -1,5 +1,12 @@
+import RectangleCanvas from "./ScriptsList";
+
 function Scripts() {
-    return <h1>Most Intersting Part : scripts</h1>
+    return (
+        <div>
+            <h1>Most Interesting Part : scripts</h1>
+            <RectangleCanvas />
+        </div>
+    );
 }
 
 export default Scripts;

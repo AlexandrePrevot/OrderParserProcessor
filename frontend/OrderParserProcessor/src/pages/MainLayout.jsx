@@ -9,7 +9,7 @@ function MainLayout() {
     return (
         <BrowserRouter>
             <SideBar />
-            <div className="flex h-screen">
+            <div className="flex">
                 <Routes>
                     <Route path="book" element={<Book />} />
                     <Route path="marketdata" element={<MarketData />} />

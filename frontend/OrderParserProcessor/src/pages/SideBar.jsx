@@ -9,7 +9,7 @@ function SideBar() {
             User
         </div>
 
-        <nav className="flex">
+        <nav className="d-flex flex-column w-25">
             <button onClick={() => navigate('/book')} className="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 rounded">
                 <Book size={18} /> Book
             </button>
@@ -23,4 +23,4 @@ function SideBar() {
     </div>
 }
 
-export default Layout;
+export default SideBar;
