@@ -8,8 +8,8 @@ import NotFound from "./NotFound";
 function MainLayout() {
     return (
         <BrowserRouter>
-            <SideBar />
-            <div className="flex">
+            <div className ='mainlayout'>
+                <SideBar />
                 <Routes>
                     <Route path="book" element={<Book />} />
                     <Route path="marketdata" element={<MarketData />} />

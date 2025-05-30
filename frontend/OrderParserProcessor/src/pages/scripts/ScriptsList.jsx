@@ -1,19 +1,20 @@
-import { useEffect, useRef } from "react";
+function List() {
+    const tags = ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape', 'Script1', 'Script2', 'Script3', 'Script4', 'Script2', 'Script3', 'Script4', 'Script2', 'Script3', 'Script4', 'Script2', 'Script3', 'Script4', 'Script2', 'Script3', 'Script4'];
+    return (
+        <div className="itemwrap p-4">
+            {tags.map((tag, index) => (<button key={index} className="px-4 py-2 rounded">
+                {tag}
+            </button>))}
+        </div>
+    );
+}
 
-function RectangleCanvas() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-  
-      ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-      ctx.fillRect(50, 50, 200, 100); // x, y, width, height
-    }, []);
-  
-    return <canvas ref={canvasRef} width={400} height={300} className="border" />;
-  }
+function ScriptsList() {
+    return (
+        <div style={{ minHeight: 600 }} className="listlayout w-75 border border-red-500">
+            <List />
+        </div>
+    );
+}
 
-export default RectangleCanvas;
+export default ScriptsList;

@@ -1,0 +1,16 @@
+.mainlayout {
+    display: flex;
+}
+
+.scriptlistlayout {
+    margin-left: 10px;
+    display: grid;
+}
+
+.listlayout {
+    margin-left: 20px;
+}
+
+.itemwrap {
+    flex-wrap: row wrap;
+}

@@ -1,10 +1,10 @@
-import RectangleCanvas from "./ScriptsList";
+import ScriptsList from "./ScriptsList";
 
 function Scripts() {
     return (
         <div>
-            <h1>Most Interesting Part : scripts</h1>
-            <RectangleCanvas />
+            <h1>write your scripts here !</h1>
+            <ScriptsList />
         </div>
     );
 }
