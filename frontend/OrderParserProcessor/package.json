@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.10",
     "bootstrap": "^5.3.6",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-resizable-panels": "^3.0.2",
+    "react-split": "^2.0.14",
+    "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
