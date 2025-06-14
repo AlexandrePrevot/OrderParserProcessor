@@ -1,10 +1,6 @@
-export async function handleScriptRequest() {
-    const request = {
-        id : "999",
-        qty : 35,
-        price : 13.2
-    }
-    const response = await fetch("http://localhost:8000/request",
+export async function handleScriptRequest(request) {
+    console.log(request)
+    const response = await fetch("http://localhost:8000/ScriptRequest",
         {   
             method: "POST",
             headers: {"Content-Type" : "application/json"}, // important for JSON data

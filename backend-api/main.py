@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 
-from models import Order
+from models import Order, AlgoScript
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Drop all tables (careful: data will be lost)
+Order.metadata.drop_all(engine)
 
 Order.metadata.create_all(engine)
 
@@ -68,3 +72,24 @@ def create_order(request: Request, db: Session = Depends(get_db)):
     db.refresh(new_order)
     print("created and persisted new order done")
     return "request is created from " + request.id
+
+
+class AlgoScriptRequest(BaseModel):
+    user: str
+    title: str
+    summary: str
+    content: str
+
+
+@app.post('/ScriptRequest')
+def create_script(script_request: AlgoScriptRequest, db: Session = Depends(get_db)):
+    print("trying to create a new algo script")
+    algo_script = AlgoScript(User=script_request.user,
+                             Title=script_request.title,
+                             Summary=script_request.summary,
+                             Content=script_request.content)
+    db.add(algo_script)
+    db.commit()
+    db.refresh(algo_script)
+    print("created a new algo (check db)")
+    return "Script is created from User " + algo_script.User;

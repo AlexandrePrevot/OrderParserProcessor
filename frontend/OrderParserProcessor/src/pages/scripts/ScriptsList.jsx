@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import styled from "styled-components";
 
+import createScriptSubmit from "../../structures/ScriptSubmit"
+import { handleScriptRequest } from "../../backend-api/ScriptRequestHandler";
 
-//Button style got from
 
+//Button style got from https://react.school/ui/button
 const theme = {
     blue: {
       default: "#3f51b5",
@@ -41,10 +43,6 @@ const theme = {
     theme: "blue",
   };
   
-  function clickMe() {
-    alert("You clicked me!");
-  }
-  
   const ButtonToggle = styled(Button)`
     opacity: 0.7;
     ${({ active }) =>
@@ -70,50 +68,15 @@ const theme = {
       opacity: 1;
     `}
   `;
-  
-  function TabGroup() {
-    const [active, setActive] = useState(types[0]);
-    return (
-      <>
-        <div>
-          {types.map((type) => (
-            <Tab
-              key={type}
-              active={active === type}
-              onClick={() => setActive(type)}
-            >
-              {type}
-            </Tab>
-          ))}
-        </div>
-        <p />
-        <p> Your payment selection: {active} </p>
-      </>
-    );
-  }
-  
-  const types = ["Cash", "Credit Card", "Bitcoin"];
-  
-  function ToggleGroup() {
-    const [active, setActive] = useState(types[0]);
-    return (
-      <div>
-        {types.map((type) => (
-          <ButtonToggle active={active === type} onClick={() => setActive(type)}>
-            {type}
-          </ButtonToggle>
-        ))}
-      </div>
-    );
-  }
+
   
 
 
 function List({AlgoScripList, onSelectedScript}) {
     return (
         <div className="flex-wrap p-4">
-            {AlgoScripList.map((AlgoScript) => (<Button key={AlgoScript.id} onClick={() => onSelectedScript(AlgoScript)} className="px-4 py-2 rounded">
-                {AlgoScript.name}
+            {AlgoScripList.map((AlgoScript) => (<Button onClick={() => onSelectedScript(AlgoScript)} className="px-4 py-2 rounded">
+                {AlgoScript.title}
             </Button>))}
         </div>
     );
@@ -123,10 +86,10 @@ function AlgoScript({selectedScript}) {
     return (
     <div>
         <div className="flex-wrap p-4">
-            <Button>
+            <Button onClick={() => handleScriptRequest(selectedScript)}>
                 Save
             </Button>
-            <Button className="px-4 py-2 rounded">
+            <Button className="px-4 py-2 rounded on">
                 Activate/Deactivate
             </Button>
         </div>
@@ -145,11 +108,10 @@ function AlgoScript({selectedScript}) {
 
 function ScriptsList() {
 
-    const AlgoScriptList = [
-        { id: 1, name: 'File 1', content: 'This is the content of File 1.' },
-        { id: 2, name: 'File 2', content: 'This is the content of File 2.\nLine 2 of file 2.' },
-        { id: 3, name: 'File 3', content: 'This is the content of File 3.' },
-        { id: 4, name: 'Script1', content: 'Script1 actual content.' }
+    const AlgoScriptSubmitList = [
+        createScriptSubmit("Low Price trigger", "if (price is low) SendBuyOrder(order)", "when the price is low, it will send a buy order", "Jean Baptiste "),
+        createScriptSubmit("High Price trigger", "if (price is high) SendSellOrder(order)", "when the price is high, it will send a sell order", "Jean Baptiste"),
+        createScriptSubmit("Short Position Send Buy", "if (Position(MYUSER) is short) SendBuyOrder(order)", "We do not accept to be short for some type of instruments", "Jean Baptiste"),
     ];
 
     const [selectedScript, onSelectedScript] = useState(null);
@@ -160,7 +122,7 @@ function ScriptsList() {
 
                 <Panel defaultSize={25}>
                     <div style={{ minHeight: 600 }} className="listlayout w-75">
-                        <List AlgoScripList = {AlgoScriptList} onSelectedScript={onSelectedScript}/>
+                        <List AlgoScripList = {AlgoScriptSubmitList} onSelectedScript={onSelectedScript}/>
                     </div>
                 </Panel>
 
@@ -179,10 +141,15 @@ function ScriptsList() {
 
                         <Panel>
                             <div>
-                                <textarea
-                                    className="w-screen h-screen"
-                                    placeholder="Summary of the script..."
-                                />
+                                {
+                                    selectedScript ? 
+                                            (
+                                            <textarea className="w-screen h-screen" placeholder="Summary of the script..." defaultValue={selectedScript.summary}/>
+                                            ) : 
+                                            (
+                                                <textarea className="w-screen h-screen" placeholder="Summary of the script..."/>
+                                            )
+                                }
                             </div>
                         </Panel>
 

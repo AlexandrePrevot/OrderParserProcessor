@@ -23,9 +23,9 @@ class Order(Base):
 class AlgoScript(Base):
     __tablename__ = "AlgoScript"
 
-    ID: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    CreationTime: Mapped[datetime] = mapped_column(DateTime)
-    Owner: Mapped[str] = mapped_column(String)
-    Title: Mapped[str] = mapped_column(String)
+    #ID: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    #CreationTime: Mapped[datetime] = mapped_column(DateTime)
+    Title: Mapped[str] = mapped_column(String, primary_key=True, nullable = False)
+    User: Mapped[str] = mapped_column(String, primary_key=True, nullable = False)
     Summary: Mapped[str] = mapped_column(String)
     Content: Mapped[str] = mapped_column(String)
