@@ -2,7 +2,7 @@
 to generate services between components (so channel + stubs etc...) for an unknown reason, it adds /services without specifying it
 Its not the case with cpp_out
 Don't specify --grpc_out with /services otherwise it creates an additionnal services folder//
-protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto --grpc_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/ --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/services/ -iname "*.proto")
+protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto --cpp_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/messages/ --grpc_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/ --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/services/ -iname "*.proto")
 
 to generate messages that are passed between components
 protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto/messages --cpp_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/messages/ $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/messages/ -iname "*.proto")

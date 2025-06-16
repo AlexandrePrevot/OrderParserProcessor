@@ -1,12 +1,3 @@
-cmake_minimum_required(VERSION 3.28.3)
-project(OrderParserProcessor)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(Protobuf CONFIG REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
-
 set(services_list
     script_submit_service.cc
 )
@@ -25,11 +16,25 @@ set(handlers_list
 
 list(TRANSFORM handlers_list PREPEND "src/handlers/")
 
+# include all generated cpp files
+file(GLOB grpc_services_list "${CMAKE_SOURCE_DIR}/generated/cpp/services/*.pb.cc")
+
+
+add_library(lib_grpc_services STATIC ${grpc_services_list})
+target_link_libraries(lib_grpc_services PUBLIC gRPC::grpc++ protobuf::libprotobuf)
+target_include_directories(lib_grpc_services PUBLIC ${CMAKE_SOURCE_DIR}/generated/cpp/services/)
+target_include_directories(lib_grpc_services PUBLIC ${CMAKE_SOURCE_DIR}/generated/cpp/messages/)
+target_include_directories(lib_grpc_services PUBLIC ${CMAKE_SOURCE_DIR}/generated/cpp/)
+
 #services and processor should be available only to handler
 add_library(lib_services STATIC ${services_list})
 target_include_directories(lib_services PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
-target_link_libraries(lib_services PUBLIC gRPC::grpc++ protobuf::libprotobuf) # protobuff probably would have to be include in
+target_link_libraries(lib_services PUBLIC lib_grpc_services)
+
+# maybe should be PRIVATE ?
+# protobuff probably would have to be include in
 # other files aswell
+target_link_libraries(lib_services PUBLIC gRPC::grpc++ protobuf::libprotobuf)
 
 add_library(lib_processors STATIC ${processors_list})
 target_include_directories(lib_processors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)

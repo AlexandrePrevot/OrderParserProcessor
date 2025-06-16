@@ -1,7 +1,7 @@
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/support/status.h>
 
-#include "generated/cpp/api_to_core.grpc.pb.h"
+#include "services/api_to_core.grpc.pb.h"
 
 class ScriptSubmitService {
 
