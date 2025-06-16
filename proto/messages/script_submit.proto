@@ -4,7 +4,7 @@ package internal;
 
 import "google/protobuf/timestamp.proto";
 
-message ScriptSubmit {
+message ScriptSubmitRequest {
     string content = 1;
     string title = 2;
     string summary = 3;

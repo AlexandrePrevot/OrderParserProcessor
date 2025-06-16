@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-import "messages/script.proto";
+import "messages/script_submit.proto";
 import "messages/synchronous_reply.proto";
 
 package internal;
 
 service ApiToCore {
-    rpc SubmitScript (ScriptSubmit) returns (SynchronousReply);
+    rpc ScriptSubmit (ScriptSubmitRequest) returns (SynchronousReply);
 }

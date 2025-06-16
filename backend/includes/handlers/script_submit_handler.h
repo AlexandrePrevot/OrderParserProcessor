@@ -1,3 +1,8 @@
+#pragma once
+
+#include <memory>
+
+#include "services/script_submit_service.h"
 
 class ScriptSubmitHandler {
 public:
@@ -14,6 +19,6 @@ public:
       return a SynchronousReply
   */
 private:
-  // service_;
+  std::unique_ptr<ScriptSubmitService> service_;
   // processor_;
 };

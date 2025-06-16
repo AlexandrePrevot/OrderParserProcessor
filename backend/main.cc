@@ -1,6 +1,3 @@
-#include <grpcpp/grpcpp.h>
-#include <grpcpp/support/status.h>
-
 #include <iostream>
 
 #include "services/script_submit_service.h"
