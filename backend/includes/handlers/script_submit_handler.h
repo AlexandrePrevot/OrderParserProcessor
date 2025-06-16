@@ -18,7 +18,11 @@ public:
       that will instantiate the ScriptSubmitProcessor that will
       return a SynchronousReply
   */
+
+  ScriptSubmitHandler();
 private:
+
+  void BuildService();
   std::unique_ptr<ScriptSubmitService> service_;
   // processor_;
 };

@@ -27,15 +27,22 @@ target_include_directories(lib_grpc_services PUBLIC ${CMAKE_SOURCE_DIR}/generate
 target_include_directories(lib_grpc_services PUBLIC ${CMAKE_SOURCE_DIR}/generated/cpp/messages/)
 target_include_directories(lib_grpc_services PUBLIC ${CMAKE_SOURCE_DIR}/generated/cpp/)
 target_link_libraries(lib_grpc_services PUBLIC gRPC::grpc++ protobuf::libprotobuf)
+
+file(GLOB grpc_messages_list "${CMAKE_SOURCE_DIR}/generated/cpp/messages/*.pb.cc")
+add_library(lib_grpc_messages STATIC ${grpc_messages_list})
+target_include_directories(lib_grpc_messages PUBLIC ${CMAKE_SOURCE_DIR}/generated/cpp/)
+target_link_libraries(lib_grpc_messages PUBLIC gRPC::grpc++ protobuf::libprotobuf)
+
 # ----------------------- protobuf and grpc -----------------------
 
 add_library(lib_services STATIC ${services_list})
 target_include_directories(lib_services PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
 target_link_libraries(lib_services PUBLIC lib_grpc_services)
-
+target_link_libraries(lib_services PUBLIC lib_grpc_messages)
 
 add_library(lib_processors STATIC ${processors_list})
 target_include_directories(lib_processors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
+target_link_libraries(lib_processors PUBLIC lib_grpc_messages)
 
 add_library(lib_handlers STATIC ${handlers_list})
 target_include_directories(lib_handlers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
