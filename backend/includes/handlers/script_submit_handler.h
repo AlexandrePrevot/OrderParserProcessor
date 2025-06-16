@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "services/script_submit_service.h"
+#include "processors/script_submit_processor.h"
 
 class ScriptSubmitHandler {
 public:
@@ -22,7 +23,8 @@ public:
   ScriptSubmitHandler();
 private:
 
-  void BuildService();
+  std::unique_ptr<ScriptSubmitService> BuildService();
+  std::unique_ptr<ScriptSubmitProcessor> BuildProcessor();
+
   std::unique_ptr<ScriptSubmitService> service_;
-  // processor_;
 };
