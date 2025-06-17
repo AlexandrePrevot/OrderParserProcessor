@@ -73,9 +73,14 @@ const theme = {
 
 
 function List({AlgoScripList, onSelectedScript}) {
+    const handleSelectScript = (AlgoScript) => {
+        console.log("neww change after clicking")
+        console.log(AlgoScript['content'])
+        onSelectedScript(AlgoScript);
+    };
     return (
         <div className="flex-wrap p-4">
-            {AlgoScripList.map((AlgoScript) => (<Button onClick={() => onSelectedScript(AlgoScript)} className="px-4 py-2 rounded">
+            {AlgoScripList.map((AlgoScript) => (<Button onClick={() => handleSelectScript(AlgoScript)} className="px-4 py-2 rounded">
                 {AlgoScript.title}
             </Button>))}
         </div>
@@ -83,36 +88,76 @@ function List({AlgoScripList, onSelectedScript}) {
 }
 
 function AlgoScript({selectedScript}) {
+    const [content, setContent] = useState('');
+    const [summary, setSummary] = useState('');
+    const handleContentChange = (e) => {
+        if (selectedScript) {
+            selectedScript.content = e.target.value;
+        }
+        setContent(e.target.value);
+      };
+    
+    const handleSummaryChange = (e) => {
+        if (selectedScript) {
+            selectedScript.summary = e.target.value;
+        }
+        setSummary(e.target.value);
+    };
+
+    const handleSave = () => {
+        handleScriptRequest(selectedScript);
+      };
+
     return (
-    <div>
-        <div className="flex-wrap p-4">
-            <Button onClick={() => handleScriptRequest(selectedScript)}>
-                Save
-            </Button>
-            <Button className="px-4 py-2 rounded on">
-                Activate/Deactivate
-            </Button>
-        </div>
-        <div>
-            {selectedScript ? 
-            (
-                <pre>{selectedScript.content}</pre>
-            ) :
-            (
-                <div>Select a file to view its content</div>
-            )}
-        </div>
-    </div>
+        <PanelGroup direction="vertical">
+            <Panel>
+                <div>
+                    <div className="flex-wrap p-4">
+                        <Button onClick={handleSave}>
+                            Save
+                        </Button>
+                        <Button className="px-4 py-2 rounded on">
+                            Activate/Deactivate
+                        </Button>
+                    </div>
+                    <div>
+                        {selectedScript ? 
+                        (
+                            <textarea className="w-screen h-screen" placeholder="Write your script here..." value={selectedScript.content} onChange={handleContentChange}/>
+                        ) :
+                        (
+                            <div>Select a file to view its content</div>
+                        )}
+                    </div>
+                </div>
+            </Panel>
+
+            <PanelResizeHandle className="h-2 bg-blue-300"/>
+
+            <Panel>
+                <div>
+                    {
+                        selectedScript ? 
+                            (
+                                <textarea className="w-screen h-screen" placeholder="Summary of the script..." value={selectedScript.summary} onChange={handleSummaryChange}/>
+                            ) : 
+                            (
+                                <textarea className="w-screen h-screen" placeholder="Summary of the script..."/>
+                            )
+                    }
+                </div>
+            </Panel>
+        </PanelGroup>
     )
 }
 
 function ScriptsList() {
 
-    const AlgoScriptSubmitList = [
+    const [scriptList, setScriptList] = useState([
         createScriptSubmit("Low Price trigger", "if (price is low) SendBuyOrder(order)", "when the price is low, it will send a buy order", "Jean Baptiste "),
         createScriptSubmit("High Price trigger", "if (price is high) SendSellOrder(order)", "when the price is high, it will send a sell order", "Jean Baptiste"),
         createScriptSubmit("Short Position Send Buy", "if (Position(MYUSER) is short) SendBuyOrder(order)", "We do not accept to be short for some type of instruments", "Jean Baptiste"),
-    ];
+      ]);
 
     const [selectedScript, onSelectedScript] = useState(null);
 
@@ -122,38 +167,14 @@ function ScriptsList() {
 
                 <Panel defaultSize={25}>
                     <div style={{ minHeight: 600 }} className="listlayout w-75">
-                        <List AlgoScripList = {AlgoScriptSubmitList} onSelectedScript={onSelectedScript}/>
+                        <List AlgoScripList = {scriptList} onSelectedScript={onSelectedScript}/>
                     </div>
                 </Panel>
 
                 <PanelResizeHandle className="w-2 bg-blue-300 hover:bg-blue-500 transition-colors duration-200 cursor-col-resize" />
 
                 <Panel>
-                    <PanelGroup direction="vertical">
-
-                        <Panel>
-                            <div>
-                                <AlgoScript selectedScript={selectedScript}/>
-                            </div>
-                        </Panel>
-
-                        <PanelResizeHandle className="h-2 bg-blue-300"/>
-
-                        <Panel>
-                            <div>
-                                {
-                                    selectedScript ? 
-                                            (
-                                            <textarea className="w-screen h-screen" placeholder="Summary of the script..." defaultValue={selectedScript.summary}/>
-                                            ) : 
-                                            (
-                                                <textarea className="w-screen h-screen" placeholder="Summary of the script..."/>
-                                            )
-                                }
-                            </div>
-                        </Panel>
-
-                    </PanelGroup>
+                    <AlgoScript selectedScript={selectedScript}/>   
                 </Panel>
 
             </PanelGroup>

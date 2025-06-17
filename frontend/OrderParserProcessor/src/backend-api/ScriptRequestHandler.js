@@ -7,8 +7,10 @@ export async function handleScriptRequest(request) {
             body: JSON.stringify(request), // Convert JS object to JSON string
         }
     );
+
     if (!response.ok) {
         throw new Error("Failed to fetch");
-      }
-      return response.json();
+    }
+  
+    return response.json();
 }

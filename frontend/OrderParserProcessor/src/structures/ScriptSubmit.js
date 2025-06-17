@@ -3,7 +3,8 @@ function createScriptSubmit(title, content, summary, user) {
         title,
         content,
         summary,
-        user
+        user,
+        active : false
     };
 }
 

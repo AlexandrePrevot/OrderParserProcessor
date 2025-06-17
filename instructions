@@ -10,3 +10,10 @@ protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto/messages --cpp_out=$ORDER_PARSER_PRO
 python (first for grpc, second for protobuff structures)
 python3 -m grpc_tools.protoc --proto_path=$ORDER_PARSER_PROCESSOR_ROOT/proto --python_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/python/ --pyi_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/python/ --grpc_python_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/python/ $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/services/ -iname "*.proto")
 python3 -m grpc_tools.protoc --proto_path=$ORDER_PARSER_PROCESSOR_ROOT/proto --python_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/python/  $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/messages/ -iname "*.proto")
+
+
+next goal
+
+send http request where contents and summary can be modified
+clean up front end a little bit
+install ANTLR on c++ side
