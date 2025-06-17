@@ -38,6 +38,8 @@ Order.metadata.drop_all(engine)
 
 Order.metadata.create_all(engine)
 
+my_handler = ApiToCoreHandler()
+
 @app.get('/')
 def index():
     return {"data" : {'name' : 'Alexandre'} }
@@ -92,7 +94,8 @@ class AlgoScriptRequest(BaseModel):
 
 
 @app.post('/ScriptRequest')
-def create_script(script_request: AlgoScriptRequest, db: Session = Depends(get_db)):
+def create_script(script_request: AlgoScriptRequest,
+                  db: Session = Depends(get_db)):
     print("trying to create a new algo script")
     algo_script = AlgoScript(User=script_request.user,
                              Title=script_request.title,
@@ -102,9 +105,11 @@ def create_script(script_request: AlgoScriptRequest, db: Session = Depends(get_d
     db.commit()
     db.refresh(algo_script)
     print("created a new algo (check db)")
-    return "Script is created from User " + algo_script.User;
-
-
-my_handler = ApiToCoreHandler()
-
-my_handler.ScriptSubmit()
+    # backend should try to process to validate it
+    # then send reply with status
+    # set the status in the DB record
+    # persist it
+    # so that user can recover it
+    # and fix it later
+    my_handler.ScriptSubmit(algo_script)
+    return "Script is created from User " + algo_script.User

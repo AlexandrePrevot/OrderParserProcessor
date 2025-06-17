@@ -11,18 +11,19 @@ class ApiToCoreHandler:
         self.channel = grpc.insecure_channel('localhost:50051')
         self.stub = services.api_to_core_pb2_grpc.ApiToCoreStub(self.channel)
 
-    def ScriptSubmit(self):
+    def ScriptSubmit(self, db_script_submit):
         script_submit_req = messages.script_submit_pb2.ScriptSubmitRequest()
-        script_submit_req.content = "content"
-        script_submit_req.title = "title"
-        script_submit_req.summary = "summary"
-        script_submit_req.user = "user"
+        script_submit_req.content = db_script_submit.Content
+        script_submit_req.title = db_script_submit.Title
+        script_submit_req.summary = db_script_submit.Summary
+        script_submit_req.user = db_script_submit.User
 
         reply = None
 
+        print("trying to submit script")
         try:
             reply = self.stub.ScriptSubmit(script_submit_req)
         except grpc.RpcError as err:
-            print("communication with B.E. failed : " + str(err))
+            print("Script submission failed : " + str(err))
 
         print("communication finished")
