@@ -1,3 +1,11 @@
+import sys
+import os
+
+root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+proto_gen_dir = os.path.abspath(os.path.join(root_dir, "generated/python/"))
+sys.path.insert(0, proto_gen_dir)
+
+
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from models import Order, AlgoScript
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
+
+from communication.communicator import ApiToCoreHandler
 
 app = FastAPI()
 
@@ -93,3 +103,8 @@ def create_script(script_request: AlgoScriptRequest, db: Session = Depends(get_d
     db.refresh(algo_script)
     print("created a new algo (check db)")
     return "Script is created from User " + algo_script.User;
+
+
+my_handler = ApiToCoreHandler()
+
+my_handler.ScriptSubmit()
