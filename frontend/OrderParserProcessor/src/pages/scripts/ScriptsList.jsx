@@ -9,16 +9,16 @@ import { handleScriptRequest } from "../../backend-api/ScriptRequestHandler";
 //Button style got from https://react.school/ui/button
 const theme = {
     blue: {
-      default: "#3f51b5",
-      hover: "#283593",
+        default: "#3f51b5",
+        hover: "#283593",
     },
     pink: {
-      default: "#e91e63",
-      hover: "#ad1457",
+        default: "#e91e63",
+        hover: "#ad1457",
     },
-  };
-  
-  const Button = styled.button`
+};
+
+const Button = styled.button`
     background-color: ${(props) => theme[props.theme].default};
     color: white;
     padding: 5px 15px;
@@ -38,21 +38,21 @@ const theme = {
       opacity: 0.7;
     }
   `;
-  
-  Button.defaultProps = {
+
+Button.defaultProps = {
     theme: "blue",
-  };
-  
-  const ButtonToggle = styled(Button)`
+};
+
+const ButtonToggle = styled(Button)`
     opacity: 0.7;
     ${({ active }) =>
-      active &&
-      `
+        active &&
+        `
       opacity: 1; 
     `}
   `;
-  
-  const Tab = styled.button`
+
+const Tab = styled.button`
     padding: 10px 30px;
     cursor: pointer;
     opacity: 0.6;
@@ -62,17 +62,17 @@ const theme = {
     border-bottom: 2px solid transparent;
     transition: ease border-bottom 250ms;
     ${({ active }) =>
-      active &&
-      `
+        active &&
+        `
       border-bottom: 2px solid black;
       opacity: 1;
     `}
   `;
 
-  
 
 
-function List({AlgoScripList, onSelectedScript}) {
+
+function List({ AlgoScripList, onSelectedScript }) {
     const handleSelectScript = (AlgoScript) => {
         console.log("neww change after clicking")
         console.log(AlgoScript['content'])
@@ -87,7 +87,7 @@ function List({AlgoScripList, onSelectedScript}) {
     );
 }
 
-function AlgoScript({selectedScript}) {
+function AlgoScript({ selectedScript }) {
     const [content, setContent] = useState('');
     const [summary, setSummary] = useState('');
     const handleContentChange = (e) => {
@@ -95,8 +95,8 @@ function AlgoScript({selectedScript}) {
             selectedScript.content = e.target.value;
         }
         setContent(e.target.value);
-      };
-    
+    };
+
     const handleSummaryChange = (e) => {
         if (selectedScript) {
             selectedScript.summary = e.target.value;
@@ -105,8 +105,10 @@ function AlgoScript({selectedScript}) {
     };
 
     const handleSave = () => {
-        handleScriptRequest(selectedScript);
-      };
+        if (selectedScript) {
+            handleScriptRequest(selectedScript);
+        }
+    };
 
     return (
         <PanelGroup direction="vertical">
@@ -121,28 +123,28 @@ function AlgoScript({selectedScript}) {
                         </Button>
                     </div>
                     <div>
-                        {selectedScript ? 
-                        (
-                            <textarea className="w-screen h-screen" placeholder="Write your script here..." value={selectedScript.content} onChange={handleContentChange}/>
-                        ) :
-                        (
-                            <div>Select a file to view its content</div>
-                        )}
+                        {selectedScript ?
+                            (
+                                <textarea className="w-screen h-screen" placeholder="Write your script here..." value={selectedScript.content} onChange={handleContentChange} />
+                            ) :
+                            (
+                                <div>Select a file to view its content</div>
+                            )}
                     </div>
                 </div>
             </Panel>
 
-            <PanelResizeHandle className="h-2 bg-blue-300"/>
+            <PanelResizeHandle className="h-2 bg-blue-300" />
 
             <Panel>
                 <div>
                     {
-                        selectedScript ? 
+                        selectedScript ?
                             (
-                                <textarea className="w-screen h-screen" placeholder="Summary of the script..." value={selectedScript.summary} onChange={handleSummaryChange}/>
-                            ) : 
+                                <textarea className="w-screen h-screen" placeholder="Summary of the script..." value={selectedScript.summary} onChange={handleSummaryChange} />
+                            ) :
                             (
-                                <textarea className="w-screen h-screen" placeholder="Summary of the script..."/>
+                                <textarea className="w-screen h-screen" placeholder="Summary of the script..." />
                             )
                     }
                 </div>
@@ -157,9 +159,18 @@ function ScriptsList() {
         createScriptSubmit("Low Price trigger", "if (price is low) SendBuyOrder(order)", "when the price is low, it will send a buy order", "Jean Baptiste "),
         createScriptSubmit("High Price trigger", "if (price is high) SendSellOrder(order)", "when the price is high, it will send a sell order", "Jean Baptiste"),
         createScriptSubmit("Short Position Send Buy", "if (Position(MYUSER) is short) SendBuyOrder(order)", "We do not accept to be short for some type of instruments", "Jean Baptiste"),
-      ]);
+    ]);
+
 
     const [selectedScript, onSelectedScript] = useState(null);
+
+    const handleScriptCreation = () => {
+        let new_script = createScriptSubmit("New Script", "New Script !", "New Script Summary !", "Jean Baptiste")
+        setScriptList([...scriptList, new_script]);
+
+        console.log("script list is now : ");
+        console.log(scriptList);
+    };
 
     return (
         <div className="w-75 h-screen">
@@ -167,14 +178,19 @@ function ScriptsList() {
 
                 <Panel defaultSize={25}>
                     <div style={{ minHeight: 600 }} className="listlayout w-75">
-                        <List AlgoScripList = {scriptList} onSelectedScript={onSelectedScript}/>
+                        <List AlgoScripList={scriptList} onSelectedScript={onSelectedScript} />
+                    </div>
+                    <div>
+                        <Button onClick={handleScriptCreation}>
+                            Create a new script
+                        </Button>
                     </div>
                 </Panel>
 
                 <PanelResizeHandle className="w-2 bg-blue-300 hover:bg-blue-500 transition-colors duration-200 cursor-col-resize" />
 
                 <Panel>
-                    <AlgoScript selectedScript={selectedScript}/>   
+                    <AlgoScript selectedScript={selectedScript} />
                 </Panel>
 
             </PanelGroup>
