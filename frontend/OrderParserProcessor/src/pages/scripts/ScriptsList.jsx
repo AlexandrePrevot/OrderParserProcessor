@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import createScriptSubmit from "../../structures/ScriptSubmit"
 import { handleScriptRequest } from "../../backend-api/ScriptRequestHandler";
-
+import { Editor } from "@monaco-editor/react";
 
 //Button style got from https://react.school/ui/button
 const theme = {
@@ -79,7 +79,7 @@ function List({ AlgoScripList, onSelectedScript }) {
         onSelectedScript(AlgoScript);
     };
     return (
-        <div className="flex-wrap p-4">
+        <div className="flex-wrap p-4 overflow-y-auto" style={{ maxHeight: "50vh" }}>
             {AlgoScripList.map((AlgoScript) => (<Button onClick={() => handleSelectScript(AlgoScript)} className="px-4 py-2 rounded">
                 {AlgoScript.title}
             </Button>))}
@@ -87,14 +87,39 @@ function List({ AlgoScripList, onSelectedScript }) {
     );
 }
 
-function AlgoScript({ selectedScript }) {
+function CodeEditor({ value, onChange }) {
+    return (
+        <Editor
+            height="80%"
+            value={value}
+            onChange={(newValue) => onChange(newValue || "")}
+            theme="vs-light"
+            options={{
+                fontSize: 14,
+                minimap: { enabled: false },
+                suggestOnTriggerCharacters: false,
+                quickSuggestions: false,
+                wordBasedSuggestions: false,
+                parameterHints: false,
+                tabCompletion: "off",
+                acceptSuggestionOnEnter: "off"
+            }}
+        />
+    );
+}
+
+
+function AlgoScript({ selectedScript, setScriptList, scriptList}) {
     const [content, setContent] = useState('');
     const [summary, setSummary] = useState('');
-    const handleContentChange = (e) => {
+    const [title, setTitle] = useState('');
+    
+    // monaco editor just pass the text when changing
+    const handleContentChange = (val) => {
         if (selectedScript) {
-            selectedScript.content = e.target.value;
+            selectedScript.content = val;
         }
-        setContent(e.target.value);
+        setContent(val)
     };
 
     const handleSummaryChange = (e) => {
@@ -104,16 +129,37 @@ function AlgoScript({ selectedScript }) {
         setSummary(e.target.value);
     };
 
+    const handleTitleChange = (e) => {
+        if (selectedScript) {
+            selectedScript.title = e.target.value;
+        }
+        setTitle(e.target.value);
+    };
+
     const handleSave = () => {
         if (selectedScript) {
+            setScriptList([...scriptList]);
             handleScriptRequest(selectedScript);
         }
     };
 
+
+    // when adding too many lines, can't see the title anymore
     return (
-        <PanelGroup direction="vertical">
-            <Panel>
-                <div>
+        <PanelGroup direction="vertical" style={{ height: "100%" }}>
+            <Panel style={{ height: "100%" }}>
+                <div style={{ height: "100%" }}>
+                    <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
+                        {
+                            selectedScript ?
+                            (
+                                <textarea  maxLength="30" placeholder="Script Title !" value={selectedScript.title} onChange={handleTitleChange} />
+                            ) :
+                            (
+                                <textarea placeholder="Create your script !" />
+                            )
+                        }
+                    </div>
                     <div className="flex-wrap p-4">
                         <Button onClick={handleSave}>
                             Save
@@ -122,10 +168,10 @@ function AlgoScript({ selectedScript }) {
                             Activate/Deactivate
                         </Button>
                     </div>
-                    <div>
+                    <div style={{ height: "80%" }}>
                         {selectedScript ?
                             (
-                                <textarea className="w-screen h-screen" placeholder="Write your script here..." value={selectedScript.content} onChange={handleContentChange} />
+                                <CodeEditor className="w-screen h-screen" value={selectedScript.content} onChange={handleContentChange} />
                             ) :
                             (
                                 <div>Select a file to view its content</div>
@@ -190,7 +236,7 @@ function ScriptsList() {
                 <PanelResizeHandle className="w-2 bg-blue-300 hover:bg-blue-500 transition-colors duration-200 cursor-col-resize" />
 
                 <Panel>
-                    <AlgoScript selectedScript={selectedScript} />
+                    <AlgoScript selectedScript={selectedScript} setScriptList={setScriptList} scriptList={scriptList}  />
                 </Panel>
 
             </PanelGroup>
