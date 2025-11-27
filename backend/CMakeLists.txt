@@ -42,7 +42,7 @@ include_directories(${ANTLR_FiScriptGrammar_OUTPUT_DIR})
 add_library(FiScriptGrammarLib
     ${ANTLR_FiScriptGrammar_CXX_OUTPUTS}
 )
-target_link_libraries(FiScriptGrammarLib antlr4_static)
+target_link_libraries(FiScriptGrammarLib PUBLIC antlr4_static)
 # ----------------------- END ANTLR -----------------------
 
 
@@ -73,6 +73,7 @@ target_link_libraries(lib_services PUBLIC lib_grpc_messages)
 add_library(lib_processors STATIC ${processors_list})
 target_include_directories(lib_processors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
 target_link_libraries(lib_processors PUBLIC lib_grpc_messages)
+#target_link_libraries(lib_processors  PUBLIC FiScriptGrammar)
 
 add_library(lib_handlers STATIC ${handlers_list})
 target_include_directories(lib_handlers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
@@ -84,4 +85,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC lib_handlers)
 target_link_libraries(${PROJECT_NAME} PUBLIC lib_services)
 target_link_libraries(${PROJECT_NAME} PUBLIC lib_processors)
 target_link_libraries(${PROJECT_NAME} PUBLIC gRPC::grpc++ protobuf::libprotobuf)
-target_link_libraries(${PROJECT_NAME} PUBLIC antlr4_static)
+target_link_libraries(${PROJECT_NAME} PUBLIC FiScriptGrammarLib)
+#target_link_libraries(${PROJECT_NAME} PUBLIC antlr4_static)
