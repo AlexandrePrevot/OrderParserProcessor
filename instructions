@@ -4,6 +4,7 @@ Its not the case with cpp_out
 Don't specify --grpc_out with /services otherwise it creates an additionnal services folder
 
 cpp here (first for grpc, second for protobuff structures)
+NOV 27 2025 - why does it work here while the cpp_out is in messages ?
 protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto --cpp_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/messages/ --grpc_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/ --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/services/ -iname "*.proto")
 protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto/messages --cpp_out=$ORDER_PARSER_PROCESSOR_ROOT/generated/cpp/messages/ $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/messages/ -iname "*.proto")
 

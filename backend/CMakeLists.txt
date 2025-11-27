@@ -17,20 +17,32 @@ target_link_libraries(lib_grpc_messages PUBLIC gRPC::grpc++ protobuf::libprotobu
 # ----------------------- END protobuf and grpc -----------------------
 
 # ----------------------- ANTLR -----------------------
-add_definitions(-DANTLR4CPP_STATIC)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-
+# Include the ANTLR support
 include(ExternalAntlr4Cpp)
-include_directories(${ANTLR4_INCLUDE_DIRS})
 
-# set variable pointing to the antlr tool that supports C++
-# this is not required if the jar file can be found under PATH environment
+# Path to the ANTLR tool (.jar)
 set(ANTLR_EXECUTABLE /usr/local/lib/java/antlr-4.13.0-complete.jar)
+
+# Required for ANTLR integration
 find_package(ANTLR REQUIRED)
 
-#add the output directories of the g4 files
-#add_executable(output main.cpp)
-#target_link_libraries(output antlr4_static)
+# Generate parser + lexer + visitor
+antlr_target(FiScriptGrammar
+    ${CMAKE_SOURCE_DIR}/rules/parser/FiScript.g4
+    VISITOR
+    OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/generated/cpp/antlr/
+)
+
+include_directories(${ANTLR4_INCLUDE_DIRS})
+include_directories(${ANTLR_FiScriptGrammar_OUTPUT_DIR})
+
+# Produce a library from generated code
+add_library(FiScriptGrammarLib
+    ${ANTLR_FiScriptGrammar_CXX_OUTPUTS}
+)
+target_link_libraries(FiScriptGrammarLib antlr4_static)
 # ----------------------- END ANTLR -----------------------
 
 

@@ -17,5 +17,9 @@ find "$GENERATED_DIR" -name '*_pb2.py' -delete
 find "$GENERATED_DIR" -name '*_grpc.py' -delete
 find "$GENERATED_DIR" -name '*.pb.cc' -delete
 find "$GENERATED_DIR" -name '*.pb.h' -delete
+find "$GENERATED_DIR" -name '*.h' -delete
+find "$GENERATED_DIR" -name '*.cpp' -delete
+find "$GENERATED_DIR" -name '*.tokens' -delete
+find "$GENERATED_DIR" -name '*.interp' -delete
 
 echo "Cleanup complete."
