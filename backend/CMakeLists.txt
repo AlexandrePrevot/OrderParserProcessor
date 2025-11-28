@@ -53,6 +53,8 @@ list(TRANSFORM services_list PREPEND "src/services/")
 
 set(processors_list
     script_submit_processor.cc
+    common/timers.cc
+    visitors/concrete_fiscript_visitor.cc
 )
 
 list(TRANSFORM processors_list PREPEND "src/processors/")

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/timers.h"
 #include "messages/script_submit.pb.h"
 #include "messages/synchronous_reply.pb.h"
 
@@ -14,4 +15,9 @@ public:
 
 private:
   std::shared_ptr<internal::SynchronousReply> synchronous_reply_;
+
+  bool Parse(const std::string &code);
+  bool ScheduleCommand(const std::vector<std::string> &arguments);
+
+  TimerManager timer_manager_;
 };

@@ -1,9 +1,17 @@
 grammar FiScript;
 
-first   : react EOF ;
-react   : EVENT ARGUMENT;
+script   : (reacton | schedule) EOF ;
+schedule   : SCHEDULE argumentList ;
+reacton   : REACTON argumentList ;
 
-ARGUMENT : '(' COUNT ')';
 
+argumentList : '(' argumentComposition ')' ;
+argumentComposition : ARGUMENT (COMMA ARGUMENT)*;
+
+
+WHITESPACE : [ \t\r\n]+ -> skip ;
 EVENT   : [A-Z]+ ;
-COUNT   : [0-9]+ | 'inf' ;
+SCHEDULE : 'Schedule' ;
+REACTON : 'ReactOn' ;
+ARGUMENT    : ([a-zA-Z] | [0-9])+ ;
+COMMA   : ',' ;
