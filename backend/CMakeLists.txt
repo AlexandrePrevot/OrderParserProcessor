@@ -45,7 +45,6 @@ add_library(FiScriptGrammarLib
 target_link_libraries(FiScriptGrammarLib PUBLIC antlr4_static)
 # ----------------------- END ANTLR -----------------------
 
-
 set(services_list
     script_submit_service.cc
 )
@@ -87,3 +86,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC lib_processors)
 target_link_libraries(${PROJECT_NAME} PUBLIC gRPC::grpc++ protobuf::libprotobuf)
 target_link_libraries(${PROJECT_NAME} PUBLIC FiScriptGrammarLib)
 #target_link_libraries(${PROJECT_NAME} PUBLIC antlr4_static)
+
+if (BUILD_TESTS)
+    message("tests will be build, because -DBUILD_TESTS=ON")
+    add_subdirectory(test)
+else()
+    message("tests will not be build, because -DBUILD_TESTS!=ON")
+endif()
