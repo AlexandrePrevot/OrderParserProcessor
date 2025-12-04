@@ -4,12 +4,7 @@
 #include <string>
 #include <vector>
 
-struct Command {
-  enum CommandType { Schedule, ReactOn };
-
-  CommandType type;
-  std::vector<std::string> arguments;
-};
+#include "command.h"
 
 class ConcreteFiScriptVisitor : public FiScriptVisitor {
 public:
