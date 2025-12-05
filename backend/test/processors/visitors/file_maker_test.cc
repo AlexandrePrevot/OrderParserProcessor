@@ -23,4 +23,5 @@ TEST(FileMakerTest, MakeCppFile) {
   FileMaker fm({c1, c2});
 
   std::cout << fm.GetCode() << std::endl;
+  fm.GenerateScript();
 }

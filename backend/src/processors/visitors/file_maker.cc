@@ -1,5 +1,8 @@
 #include "processors/visitors/file_maker.h"
 
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -21,6 +24,52 @@ FileMaker::FileMaker(const std::vector<Command> &commands) {
       return;
   }
   BuildOutput();
+}
+
+void FileMaker::GenerateScript() const noexcept {
+  if (output_.empty()) {
+    std::cout << "nothing to generate" << std::endl;
+    return;
+  }
+
+  // Call Python script (keep as you have it)
+  std::stringstream cmd;
+  cmd << "python3 $ORDER_PARSER_PROCESSOR_ROOT/backend/src/system_builder.py "
+         "--includes \"test1\" --scriptName "
+         "\"MyScriptAlexandrePrevot\"";
+
+  std::string command = cmd.str();
+  std::cout << "running command : " << command << std::endl;
+  system(command.c_str());
+
+  std::cout << "placing the main file" << std::endl;
+
+  // Get environment variable
+  const char *root = std::getenv("ORDER_PARSER_PROCESSOR_ROOT");
+  if (!root) {
+    std::cerr << "Environment variable ORDER_PARSER_PROCESSOR_ROOT not set!"
+              << std::endl;
+    return;
+  }
+
+  // Build full path
+  std::filesystem::path mainPath =
+      std::filesystem::path(root) / ".." / "output_bin" / "main.cc";
+
+  // Ensure the directory exists
+  std::filesystem::create_directories(mainPath.parent_path());
+
+  // the main.cc file is placed by the cpp program
+  // but the rest is done by the python program
+  // everything should be handled by python
+  // but it is very annoying to handle the "" of std::cout
+  // when passing the code as arguments to the python file
+  std::ofstream file(mainPath);
+  if (!file) {
+    std::cerr << "Failed to open file for writing: " << mainPath << std::endl;
+    return;
+  }
+  file << output_;
 }
 
 bool FileMaker::AddCommand(const Command &command) { return MakeLine(command); }
@@ -196,7 +245,7 @@ void FileMaker::Include(const Command &command) {
   using Type = Command::CommandType;
   switch (command.type) {
   case Type::Schedule:
-    InsertInclude("#include \"timers.h\"");
+    InsertInclude("#include \"processors/common/timers.h\"");
     break;
   case Type::Print:
     InsertInclude("#include <iostream>");
