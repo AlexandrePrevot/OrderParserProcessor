@@ -35,6 +35,8 @@ private:
     code_.insert(includes_it_, {0, include});
   }
 
+  void SetGRPC();
+
   std::list<std::pair<long, std::string>> code_;
   std::unordered_set<Command::CommandType> need_include_;
   std::unordered_set<Command::CommandType> history_;

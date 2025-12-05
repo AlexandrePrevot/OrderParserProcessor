@@ -7,7 +7,13 @@
 #include <sstream>
 #include <vector>
 
+constexpr std::string_view kEndIncludes = "// ----- end includes";
+
 FileMaker::FileMaker(const std::vector<Command> &commands) {
+  code_.push_back({0, "#include <grpcpp/grpcpp.h>"});
+  code_.push_back({0, "// ----- end includes"});
+  code_.push_back({0, ""});
+  SetGRPC();
   code_.push_back({0, ""});
   code_.push_back({0, "int main() {"});
   code_.push_back({1, "return 0;"});
@@ -15,7 +21,8 @@ FileMaker::FileMaker(const std::vector<Command> &commands) {
 
   includes_it_ = code_.begin();
   code_it_ = code_.begin();
-  code_it_++;
+  while (code_it_->second != "int main() {")
+    code_it_++;
   code_it_++;
   tab_to_add_ = 0;
 
@@ -46,15 +53,16 @@ void FileMaker::GenerateScript() const noexcept {
 
   // Get environment variable
   const char *root = std::getenv("ORDER_PARSER_PROCESSOR_ROOT");
-  if (!root) {
+  if (root == nullptr) {
     std::cerr << "Environment variable ORDER_PARSER_PROCESSOR_ROOT not set!"
               << std::endl;
     return;
   }
 
+  std::filesystem::path env(root);
+
   // Build full path
-  std::filesystem::path mainPath =
-      std::filesystem::path(root) / ".." / "output_bin" / "main.cc";
+  std::filesystem::path mainPath = env / ".." / "output_bin" / "main.cc";
 
   // Ensure the directory exists
   std::filesystem::create_directories(mainPath.parent_path());
@@ -64,12 +72,37 @@ void FileMaker::GenerateScript() const noexcept {
   // everything should be handled by python
   // but it is very annoying to handle the "" of std::cout
   // when passing the code as arguments to the python file
-  std::ofstream file(mainPath);
-  if (!file) {
-    std::cerr << "Failed to open file for writing: " << mainPath << std::endl;
+  {
+    std::ofstream file(mainPath);
+    if (!file) {
+      std::cerr << "Failed to open file for writing: " << mainPath << std::endl;
+      return;
+    }
+    file << output_;
+    file.flush();
+  }
+
+  std::filesystem::path out = env / ".." / "output_bin";
+  std::filesystem::path build = out / "build";
+
+  std::filesystem::create_directories(build);
+
+  // Change directory to build/
+  std::filesystem::current_path(build);
+
+  // CMake
+  if (std::system("cmake ..") != 0) {
+    std::cerr << "CMake failed\n";
     return;
   }
-  file << output_;
+
+  // Make
+  if (std::system("make -j 2") != 0) {
+    std::cerr << "Make failed\n";
+    return;
+  }
+
+  std::cout << "Build completed successfully!\n";
 }
 
 bool FileMaker::AddCommand(const Command &command) { return MakeLine(command); }
@@ -195,7 +228,8 @@ bool FileMaker::MakeScheduleCommand(const Command &command) {
     MakeLine(sub_command);
   }
   tab_to_add_--;
-  InsertCode(std::string("}, ") + std::to_string(seconds_to_wait) + ", " +
+  InsertCode(std::string("}, std::chrono::seconds(") +
+                 std::to_string(seconds_to_wait) + "), " +
                  std::to_string(repeat) + ");",
              tab);
 
@@ -252,4 +286,17 @@ void FileMaker::Include(const Command &command) {
   default:
     break;
   }
+}
+
+void FileMaker::SetGRPC() {
+  code_.push_back({0, "void RunServer() {"});
+  code_.push_back({1, "const std::string server_address(\"0.0.0.0:50051\");"});
+  code_.push_back({1, "grpc::ServerBuilder builder;"});
+  code_.push_back({1, "builder.AddListeningPort(server_address, "
+                      "grpc::InsecureServerCredentials());"});
+  code_.push_back({0, ""});
+  code_.push_back(
+      {1, "std::unique_ptr<grpc::Server> server(builder.BuildAndStart());"});
+  code_.push_back({1, "server->Wait();"});
+  code_.push_back({0, "}"});
 }
