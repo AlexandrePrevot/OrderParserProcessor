@@ -15,12 +15,6 @@ python3 -m grpc_tools.protoc --proto_path=$ORDER_PARSER_PROCESSOR_ROOT/proto --p
 
 .g4 files are generated automatically when building with cmake
 
-next goal
-
-send http request where contents and summary can be modified // done
-add button to create a script // done
-clean up front end a little bit
-install ANTLR on c++ side // done
 
 
 

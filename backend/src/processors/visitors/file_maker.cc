@@ -10,6 +10,7 @@
 constexpr std::string_view kEndIncludes = "// ----- end includes";
 
 FileMaker::FileMaker(const std::vector<Command> &commands) {
+  compiled_ = true;
   code_.push_back({0, "#include <grpcpp/grpcpp.h>"});
   code_.push_back({0, "// ----- end includes"});
   code_.push_back({0, ""});
@@ -28,6 +29,7 @@ FileMaker::FileMaker(const std::vector<Command> &commands) {
 
   for (const auto &command : commands) {
     if (!AddCommand(command))
+      compiled_ = false;
       return;
   }
   BuildOutput();
@@ -42,8 +44,11 @@ void FileMaker::GenerateScript() const noexcept {
   // Call Python script (keep as you have it)
   std::stringstream cmd;
   cmd << "python3 $ORDER_PARSER_PROCESSOR_ROOT/backend/src/system_builder.py "
-         "--includes \"test1\" --scriptName "
-         "\"MyScriptAlexandrePrevot\"";
+         "--scriptName \"MyScriptAlexandrePrevot\" --includes ";
+
+  for (const std::string &include : includes_) {
+    cmd << include;
+  }
 
   std::string command = cmd.str();
   std::cout << "running command : " << command << std::endl;
@@ -279,10 +284,10 @@ void FileMaker::Include(const Command &command) {
   using Type = Command::CommandType;
   switch (command.type) {
   case Type::Schedule:
-    InsertInclude("#include \"processors/common/timers.h\"");
+    InsertInclude("\"processors/common/timers.h\"", true);
     break;
   case Type::Print:
-    InsertInclude("#include <iostream>");
+    InsertInclude("<iostream>", false);
   default:
     break;
   }

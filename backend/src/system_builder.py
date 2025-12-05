@@ -5,8 +5,8 @@ import argparse
 
 """
 args:
-script_name
-script_includes
+scriptName
+includes
 """
 
 parser = argparse.ArgumentParser()
@@ -63,8 +63,10 @@ services_generated_output_dir.mkdir(exist_ok=True)
 
 project_name = script_name
 
-shutil.copy(project_root + "/backend/includes/processors/common/timers.h", include_common_output_dir.resolve())
-shutil.copy(project_root + "/backend/src/processors/common/timers.cc", src_common_output_dir.resolve())
+for include in includes:
+    include = include.removesuffix(".h")
+    shutil.copy(project_root + "/backend/includes/" + include + ".h", include_common_output_dir.resolve())
+    shutil.copy(project_root + "/backend/src/" + include + ".cc", src_common_output_dir.resolve())
 shutil.copytree(project_root + "/generated/cpp/messages", messages_generated_output_dir.resolve(), dirs_exist_ok=True)
 shutil.copytree(project_root + "/generated/cpp/services", services_generated_output_dir.resolve(), dirs_exist_ok=True)
 

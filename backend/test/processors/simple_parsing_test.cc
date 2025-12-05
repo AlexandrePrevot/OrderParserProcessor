@@ -8,10 +8,10 @@
 // -----------------------------------------------------------------------------
 namespace {
 
-constexpr std::string_view kScheduleCorrect            = "Schedule(Start, 3s)";
-constexpr std::string_view kScheduleWrongArgType       = "Schedule(Start, 23As1s)";
-constexpr std::string_view kScheduleWrongArgNumber     = "Schedule(Start, 3s, another)";
-constexpr std::string_view kScheduleNotProperlyWritten = "Shcedule(Start, 3s)";
+constexpr std::string_view kScheduleCorrect            = "Schedule(Start, 3s, 3)";
+constexpr std::string_view kScheduleWrongArgType       = "Schedule(Start, 23As1s, as)";
+constexpr std::string_view kScheduleWrongArgNumber     = "Schedule(Start, 3s, another, another)";
+constexpr std::string_view kScheduleNotProperlyWritten = "Shcedule(Start, 3s, 3)";
 
 struct ScriptTestCase {
     const char* name;

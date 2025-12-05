@@ -20,6 +20,8 @@ private:
 
   virtual std::any visitReacton(FiScriptParser::ReactonContext *context);
 
+  virtual std::any visitPrint(FiScriptParser::PrintContext *context);
+
   virtual std::any
   visitArgumentList(FiScriptParser::ArgumentListContext *context);
 

@@ -13,6 +13,7 @@ public:
   FileMaker(const std::vector<Command> &commands);
 
   inline std::string GetCode() const { return output_; }
+  inline bool Compiled() const { return compiled_; }
 
   void GenerateScript() const noexcept;
 
@@ -31,16 +32,20 @@ private:
     code_.insert(code_it_, {tab + tab_to_add_, code});
   }
 
-  inline void InsertInclude(const std::string &include) {
-    code_.insert(includes_it_, {0, include});
+  inline void InsertInclude(const std::string &name, bool save) {
+    code_.insert(includes_it_, {0, "#include " + name});
+    if (save) {
+      includes_.insert(name);
+    }
   }
 
   void SetGRPC();
 
   std::list<std::pair<long, std::string>> code_;
-  std::unordered_set<Command::CommandType> need_include_;
+  std::unordered_set<std::string> includes_;
   std::unordered_set<Command::CommandType> history_;
   std::string output_;
+  bool compiled_;
   long tab_to_add_;
 
   // to know at which line the includes are

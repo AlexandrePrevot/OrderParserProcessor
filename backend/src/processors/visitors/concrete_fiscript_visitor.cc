@@ -33,6 +33,7 @@ std::any
 ConcreteFiScriptVisitor::visitScript(FiScriptParser::ScriptContext *ctx) {
   FiScriptParser::ReactonContext *reacton = ctx->reacton();
   FiScriptParser::ScheduleContext *schedule = ctx->schedule();
+  FiScriptParser::PrintContext *print = ctx->print();
 
   Command command;
   if (reacton != nullptr) {
@@ -43,6 +44,10 @@ ConcreteFiScriptVisitor::visitScript(FiScriptParser::ScriptContext *ctx) {
     command.type = Command::CommandType::Schedule;
     command.arguments =
         std::any_cast<std::vector<std::string>>(visitSchedule(schedule));
+  } else if (print != nullptr) {
+    command.type = Command::CommandType::Print;
+    command.arguments =
+        std::any_cast<std::vector<std::string>>(visitPrint(print));
   }
 
   return command;
@@ -55,6 +60,10 @@ ConcreteFiScriptVisitor::visitSchedule(FiScriptParser::ScheduleContext *ctx) {
 
 std::any
 ConcreteFiScriptVisitor::visitReacton(FiScriptParser::ReactonContext *ctx) {
+  return visitArgumentList(ctx->argumentList());
+}
+
+std::any ConcreteFiScriptVisitor::visitPrint(FiScriptParser::PrintContext *ctx) {
   return visitArgumentList(ctx->argumentList());
 }
 
