@@ -16,6 +16,8 @@ private:
 
   virtual std::any visitScript(FiScriptParser::ScriptContext *context);
 
+  virtual std::any visitStatement(FiScriptParser::StatementContext *context);
+
   virtual std::any visitSchedule(FiScriptParser::ScheduleContext *context);
 
   virtual std::any visitReacton(FiScriptParser::ReactonContext *context);
@@ -27,6 +29,8 @@ private:
 
   virtual std::any
   visitArgumentComposition(FiScriptParser::ArgumentCompositionContext *context);
+
+  virtual std::any visitBlock(FiScriptParser::BlockContext *context);
 
   std::vector<Command> commands_list_;
 };

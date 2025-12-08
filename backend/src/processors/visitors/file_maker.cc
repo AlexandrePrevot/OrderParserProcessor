@@ -28,9 +28,12 @@ FileMaker::FileMaker(const std::vector<Command> &commands) {
   tab_to_add_ = 0;
 
   for (const auto &command : commands) {
-    if (!AddCommand(command))
+    if (!AddCommand(command)) {
+      std::cout << "could not compile because of command " << command.type
+                << std::endl;
       compiled_ = false;
       return;
+    }
   }
   BuildOutput();
 }
@@ -187,8 +190,10 @@ const bool ScheduleArgsValid(const std::vector<std::string> &args) {
     return false;
   }
 
-  if (args.size() == 0)
+  if (args.size() == 0) {
+    std::cout << "no arguments given to create timer" << std::endl;
     return false;
+  }
 
   int nbr = 0;
   try {
@@ -212,20 +217,21 @@ bool FileMaker::MakeScheduleCommand(const Command &command) {
   if (!ScheduleArgsValid(args))
     return false;
 
+  std::cout << "adding the schedule command" << std::endl;
+
   const int seconds_to_wait = TimeInSecondToInteger(args[1]);
   const int repeat = stoi(args[2]);
 
   long tab = code_it_->first;
 
+  const bool added_before = history_.find(command.type) != std::cend(history_);
   Include(command);
 
-  const bool added_before = history_.find(command.type) != std::cend(history_);
   if (!added_before) {
     InsertCode("TimerManager timer_manager;", tab);
     InsertCode("timer_manager.WaitTillLast(0);", tab);
     code_it_--;
   }
-  history_.insert(command.type);
 
   InsertCode("timer_manager.CreateTimer([]() {", tab);
   tab_to_add_++;
@@ -266,8 +272,9 @@ bool FileMaker::MakePrintCommand(const Command &command) {
   if (!PrintArgsValid(command.arguments))
     return false;
 
+  std::cout << "adding the print command" << std::endl;
+
   Include(command);
-  history_.insert(Command::CommandType::Print);
 
   long tab = code_it_->first;
   InsertCode(std::string("std::cout << ") + command.arguments[0] +
@@ -291,6 +298,8 @@ void FileMaker::Include(const Command &command) {
   default:
     break;
   }
+
+  history_.insert(command.type);
 }
 
 void FileMaker::SetGRPC() {
