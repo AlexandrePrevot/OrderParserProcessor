@@ -21,6 +21,7 @@ add_executable(
   processors_test
   processors/simple_parsing_test.cc 
   processors/common/timer_test.cc
+  processors/visitors/concrete_fiscript_visitor_test.cc
   processors/visitors/file_maker_test.cc
 )
 

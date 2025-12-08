@@ -96,11 +96,17 @@ file(GLOB processors_file_list
     "${{CMAKE_SOURCE_DIR}}/src/*.cc"
     "${{CMAKE_SOURCE_DIR}}/src/processors/common/*.cc")
 
-add_library(lib_processors STATIC ${{processors_file_list}})
-target_include_directories(lib_processors PUBLIC ${{CMAKE_SOURCE_DIR}}/include)
 
 add_executable(${{PROJECT_NAME}} main.cc)
-target_link_libraries(${{PROJECT_NAME}} PUBLIC lib_processors)
+
+if(processors_file_list)
+    add_library(lib_processors OBJECT ${{processors_file_list}})
+    target_include_directories(lib_processors PUBLIC ${{CMAKE_SOURCE_DIR}}/include)
+    target_link_libraries(${{PROJECT_NAME}} PUBLIC lib_processors)
+else()
+    message("lib_processors is empty, so no need to build this library")
+endif()
+
 target_link_libraries(${{PROJECT_NAME}} PUBLIC lib_grpc_services)
 target_link_libraries(${{PROJECT_NAME}} PUBLIC lib_grpc_messages)
 target_link_libraries(${{PROJECT_NAME}} PUBLIC gRPC::grpc++ protobuf::libprotobuf)
