@@ -4,12 +4,7 @@
 #include <string>
 #include <vector>
 
-struct Command {
-  enum CommandType { Schedule, ReactOn };
-
-  CommandType type;
-  std::vector<std::string> arguments;
-};
+#include "command.h"
 
 class ConcreteFiScriptVisitor : public FiScriptVisitor {
 public:
@@ -21,15 +16,21 @@ private:
 
   virtual std::any visitScript(FiScriptParser::ScriptContext *context);
 
+  virtual std::any visitStatement(FiScriptParser::StatementContext *context);
+
   virtual std::any visitSchedule(FiScriptParser::ScheduleContext *context);
 
   virtual std::any visitReacton(FiScriptParser::ReactonContext *context);
+
+  virtual std::any visitPrint(FiScriptParser::PrintContext *context);
 
   virtual std::any
   visitArgumentList(FiScriptParser::ArgumentListContext *context);
 
   virtual std::any
   visitArgumentComposition(FiScriptParser::ArgumentCompositionContext *context);
+
+  virtual std::any visitBlock(FiScriptParser::BlockContext *context);
 
   std::vector<Command> commands_list_;
 };

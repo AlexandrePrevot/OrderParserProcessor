@@ -17,7 +17,4 @@ private:
   std::shared_ptr<internal::SynchronousReply> synchronous_reply_;
 
   bool Parse(const std::string &code);
-  bool ScheduleCommand(const std::vector<std::string> &arguments);
-
-  TimerManager timer_manager_;
 };

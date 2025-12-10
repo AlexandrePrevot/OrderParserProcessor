@@ -1,17 +1,35 @@
 grammar FiScript;
 
-script   : (reacton | schedule) EOF ;
-schedule   : SCHEDULE argumentList ;
-reacton   : REACTON argumentList ;
+script   : statement* EOF ;
+
+statement
+    : schedule
+    | reacton
+    | print
+    ;
+
+schedule   : SCHEDULE argumentList block ;
+reacton   : REACTON argumentList block ;
+print   : PRINT argumentList;
+
+block
+    : '{' statement* '}'
+    ;
 
 
 argumentList : '(' argumentComposition ')' ;
 argumentComposition : ARGUMENT (COMMA ARGUMENT)*;
 
 
+fragment WORD : [a-zA-Z] ;
+fragment NUMBER : [0-9] ;
+fragment WORD_OR_NBR : (WORD | NUMBER)+ ;
+fragment STRING : '"' (~['"'])* '"' ;
+
+
 WHITESPACE : [ \t\r\n]+ -> skip ;
-EVENT   : [A-Z]+ ;
 SCHEDULE : 'Schedule' ;
 REACTON : 'ReactOn' ;
-ARGUMENT    : ([a-zA-Z] | [0-9])+ ;
+PRINT : 'Print' ;
+ARGUMENT    : (STRING | WORD_OR_NBR) ;
 COMMA   : ',' ;

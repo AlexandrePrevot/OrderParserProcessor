@@ -24,15 +24,25 @@ bool ConcreteFiScriptVisitor::Compile(const std::string &code) {
     return false;
   }
 
-  commands_list_.push_back(std::any_cast<Command>(visitScript(tree)));
+  visitScript(tree);
 
   return true;
 }
 
 std::any
 ConcreteFiScriptVisitor::visitScript(FiScriptParser::ScriptContext *ctx) {
+  for (const auto &statement : ctx->statement()) {
+    commands_list_.push_back(std::any_cast<Command>(visitStatement(statement)));
+  }
+
+  return nullptr;
+}
+
+std::any
+ConcreteFiScriptVisitor::visitStatement(FiScriptParser::StatementContext *ctx) {
   FiScriptParser::ReactonContext *reacton = ctx->reacton();
   FiScriptParser::ScheduleContext *schedule = ctx->schedule();
+  FiScriptParser::PrintContext *print = ctx->print();
 
   Command command;
   if (reacton != nullptr) {
@@ -40,9 +50,11 @@ ConcreteFiScriptVisitor::visitScript(FiScriptParser::ScriptContext *ctx) {
     command.arguments =
         std::any_cast<std::vector<std::string>>(visitReacton(reacton));
   } else if (schedule != nullptr) {
-    command.type = Command::CommandType::Schedule;
+    return visitSchedule(schedule);
+  } else if (print != nullptr) {
+    command.type = Command::CommandType::Print;
     command.arguments =
-        std::any_cast<std::vector<std::string>>(visitSchedule(schedule));
+        std::any_cast<std::vector<std::string>>(visitPrint(print));
   }
 
   return command;
@@ -50,11 +62,25 @@ ConcreteFiScriptVisitor::visitScript(FiScriptParser::ScriptContext *ctx) {
 
 std::any
 ConcreteFiScriptVisitor::visitSchedule(FiScriptParser::ScheduleContext *ctx) {
-  return visitArgumentList(ctx->argumentList());
+  Command command;
+  command.type = Command::CommandType::Schedule;
+  command.arguments = std::any_cast<std::vector<std::string>>(
+      visitArgumentList(ctx->argumentList()));
+
+  for (const auto &statement : ctx->block()->statement()) {
+    command.in_scope.push_back(
+        std::any_cast<Command>(visitStatement(statement)));
+  }
+  return command;
 }
 
 std::any
 ConcreteFiScriptVisitor::visitReacton(FiScriptParser::ReactonContext *ctx) {
+  return visitArgumentList(ctx->argumentList());
+}
+
+std::any
+ConcreteFiScriptVisitor::visitPrint(FiScriptParser::PrintContext *ctx) {
   return visitArgumentList(ctx->argumentList());
 }
 
@@ -72,5 +98,15 @@ std::any ConcreteFiScriptVisitor::visitArgumentComposition(
   for (const auto &arg : argument_list) {
     output.push_back(arg->getText());
   }
+  return output;
+}
+
+// on 8th dec 2025 : useless
+// not used to avoid useless any_cast
+std::any
+ConcreteFiScriptVisitor::visitBlock(FiScriptParser::BlockContext *ctx) {
+  std::vector<Command> output;
+  for (const auto &statement : ctx->statement())
+    output.push_back(std::any_cast<Command>(visitStatement(statement)));
   return output;
 }
