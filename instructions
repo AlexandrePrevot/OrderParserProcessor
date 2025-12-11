@@ -16,8 +16,6 @@ python3 -m grpc_tools.protoc --proto_path=$ORDER_PARSER_PROCESSOR_ROOT/proto --p
 .g4 files are generated automatically when building with cmake
 
 
-
-
 to generate the script
 
 compile main project
@@ -30,3 +28,26 @@ mkdir build
 cd build
 cmake ../
 make -j 2
+
+
+where to get the data
+https://www.kaggle.com/datasets/borismarjanovic/daily-and-intraday-stock-price-data?
+the idea is to make a python file to parse it, and a matching engine to receive it
+
+
+goal thursday :
+
+create table script with 
+- ScriptID primary key
+- Code required
+- Title required
+- CreationDate required
+- Author required
+- Active required
+- ActivationDate optional
+- Summary optional
+- LastModifDate optional
+
+
+python dockerized + connected to DB
++ can save to DB
