@@ -1,3 +1,4 @@
+# ---- image to generate gRPC ----
 FROM python:3.12 AS backend_api_deps_builder
 
 ENV ORDER_PARSER_PROCESSOR_ROOT=/app
@@ -5,9 +6,6 @@ WORKDIR /app/backend-api
 
 COPY backend-api/requirements.txt /app/backend-api 
 RUN pip install --no-cache-dir -r requirements.txt
-
-# ---- Generate gRPC ----
-FROM backend_api_deps_builder AS backend_api_grpc_generator
 
 WORKDIR /app
 
@@ -27,10 +25,18 @@ RUN python3 -m grpc_tools.protoc \
     $(find $ORDER_PARSER_PROCESSOR_ROOT/proto/messages/ -iname "*.proto")
 
 # ---- Final container ----
-FROM backend_api_grpc_generator AS backend_api_builder
+FROM python:3.12-slim AS runtime
 
-COPY backend-api/ /app/backend-api
+ENV ORDER_PARSER_PROCESSOR_ROOT=/app
 WORKDIR /app/backend-api
+
+# Copy requirements + gRPC generated files
+# proto are needed to generate gRPC fiels so we don't mind
+# not copying them
+COPY --from=deps /usr/local /usr/local
+COPY --from=deps /app/generated /app/generated
+COPY backend-api/ /app/backend-api
+
 
 EXPOSE 8000
 
