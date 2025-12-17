@@ -3,6 +3,7 @@ project(OrderParserProcessor)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(ANTLR_VERSION $ENV{ANTLR_VERSION})
 
 option(BUILD_TESTS "Build unit tests" OFF)
 
