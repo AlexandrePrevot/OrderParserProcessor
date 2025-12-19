@@ -1,0 +1,44 @@
+services:
+  backend_api:
+    build:
+      context: .
+      dockerfile: docker/backend_api.Dockerfile
+    container_name: backend_api
+    networks:
+      - order_parser_processor_network
+
+
+  # we need 2 databases
+  # one is the test databases
+  # the other one is the prod databases
+  # having different databases allows to test
+  # without messing up the data of the production
+  mysql_test:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${TEST_DB_PASS}
+      MYSQL_DATABASE: ${TEST_DB_NAME}
+    # to make sure the data is flushed when test db is turned off
+    tmpfs:
+      - /var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  mysql_prod:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PROD_DB_PASS}
+      MYSQL_DATABASE: ${PROD_DB_NAME}
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+
+    
+
+volumes:
+  mysql_prod_data:
+
+networks:
+  order_parser_processor_network:
+    driver: bridge
