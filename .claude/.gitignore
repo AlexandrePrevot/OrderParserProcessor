@@ -1,0 +1,14 @@
+# Local settings that should not be shared with the team
+settings.local.json
+
+# Local project memory (personal notes)
+CLAUDE.local.md
+*.local.md
+
+# Temporary files
+*.tmp
+*.log
+
+# IDE/Editor files
+.DS_Store
+Thumbs.db
