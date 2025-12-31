@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package internal;
+
+import "google/protobuf/timestamp.proto";
+
+message PriceUpdate {
+    double price = 1;
+    int64 quantity = 2;
+    google.protobuf.Timestamp timestamp = 3;
+    string instrument_id = 4;
+}
