@@ -122,6 +122,8 @@ bool FileMaker::MakeLine(const Command &command) {
     return MakeScheduleCommand(command);
   case Type::Print:
     return MakePrintCommand(command);
+  case Type::ReactOn:
+    return MakeReactOnCommand(command);
   default:
     break;
   }
@@ -284,6 +286,68 @@ bool FileMaker::MakePrintCommand(const Command &command) {
   return true;
 }
 
+bool ReactOnArgsValid(const std::vector<std::string> &args) {
+  if (args.size() != 2) {
+    std::cout << "expected 2 arguments: instrument_id and repetition count"
+              << std::endl;
+    return false;
+  }
+
+  // First argument should be a string (instrument_id)
+  if (args[0].size() < 2 || args[0].front() != '"' || args[0].back() != '"') {
+    std::cout << "first argument (instrument_id) should be a string"
+              << std::endl;
+    return false;
+  }
+
+  // Second argument should be an integer or -1
+  const std::string &repeat_str = args[1];
+  if (repeat_str == "-1") {
+    return true;  // -1 is valid for infinite
+  }
+
+  if (!ValidInteger(repeat_str)) {
+    std::cout << "second argument (repetition count) should be an integer or -1"
+              << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool FileMaker::MakeReactOnCommand(const Command &command) {
+  const std::vector<std::string> &args = command.arguments;
+
+  if (!ReactOnArgsValid(args))
+    return false;
+
+  std::cout << "adding the reacton command" << std::endl;
+
+  const std::string &instrument_id = args[0];
+  const int repeat = std::stoi(args[1]);
+
+  long tab = code_it_->first;
+
+  const bool added_before = history_.find(command.type) != std::cend(history_);
+  Include(command);
+
+  if (!added_before) {
+    InsertCode("ReactOnManager reacton_manager;", tab);
+  }
+
+  InsertCode(std::string("reacton_manager.RegisterReaction(") + instrument_id +
+                 ", " + std::to_string(repeat) + ", []() {",
+             tab);
+  tab_to_add_++;
+  for (const auto &sub_command : command.in_scope) {
+    MakeLine(sub_command);
+  }
+  tab_to_add_--;
+  InsertCode("});", tab);
+
+  return true;
+}
+
 void FileMaker::Include(const Command &command) {
   if (history_.find(command.type) != std::cend(history_))
     return;
@@ -295,6 +359,10 @@ void FileMaker::Include(const Command &command) {
     break;
   case Type::Print:
     InsertInclude("<iostream>", false);
+    break;
+  case Type::ReactOn:
+    InsertInclude("\"processors/common/reacton_manager.h\"", true);
+    break;
   default:
     break;
   }
