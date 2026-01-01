@@ -1,6 +1,6 @@
 set(services_list
     script_submit_service.cc
-    reacton_manager.cc
+    reacton_service.cc
 )
 
 list(TRANSFORM services_list PREPEND "src/services/")

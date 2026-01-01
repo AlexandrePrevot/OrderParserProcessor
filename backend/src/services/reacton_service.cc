@@ -1,9 +1,9 @@
-#include "services/reacton_manager.h"
+#include "services/reacton_service.h"
 
 #include <iostream>
 #include <google/protobuf/empty.pb.h>
 
-ReactOnManager::ReactOnManager() : stop_(false) {
+ReactOnService::ReactOnService() : stop_(false) {
   // Create channel to Distributor server
   channel_ = grpc::CreateChannel("localhost:50052",
                                  grpc::InsecureChannelCredentials());
@@ -12,10 +12,10 @@ ReactOnManager::ReactOnManager() : stop_(false) {
   stub_ = internal::MarketDataService::NewStub(channel_);
 
   // Start background thread to read market data stream
-  reader_thread_ = std::thread(&ReactOnManager::ReadMarketDataStream, this);
+  reader_thread_ = std::thread(&ReactOnService::ReadMarketDataStream, this);
 }
 
-ReactOnManager::~ReactOnManager() {
+ReactOnService::~ReactOnService() {
   stop_ = true;
 
   if (reader_thread_.joinable()) {
@@ -23,20 +23,20 @@ ReactOnManager::~ReactOnManager() {
   }
 }
 
-void ReactOnManager::RegisterReaction(const std::string &instrument_id,
+void ReactOnService::RegisterReaction(const std::string &instrument_id,
                                        int max_count,
                                        std::function<void()> callback) {
   reactions_.push_back(
       std::make_shared<Reaction>(instrument_id, max_count, callback));
 }
 
-void ReactOnManager::WaitForCompletion() {
+void ReactOnService::WaitForCompletion() {
   if (reader_thread_.joinable()) {
     reader_thread_.join();
   }
 }
 
-bool ReactOnManager::ShouldStopReading() {
+bool ReactOnService::ShouldStopReading() {
   // Stop if externally requested
   if (stop_) {
     return true;
@@ -55,7 +55,7 @@ bool ReactOnManager::ShouldStopReading() {
   return true;
 }
 
-void ReactOnManager::ReadMarketDataStream() {
+void ReactOnService::ReadMarketDataStream() {
   grpc::ClientContext context;
   google::protobuf::Empty request;
 

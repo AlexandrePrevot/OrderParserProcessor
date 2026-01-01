@@ -21,15 +21,15 @@ struct Reaction {
       : instrument_id(id), max_count(max), current_count(0), callback(cb) {}
 };
 
-class ReactOnManager {
+class ReactOnService {
 public:
-  ReactOnManager();
-  ~ReactOnManager();
+  ReactOnService();
+  ~ReactOnService();
 
-  ReactOnManager(const ReactOnManager &) = delete;
-  ReactOnManager &operator=(const ReactOnManager &) = delete;
-  ReactOnManager(ReactOnManager &&) = delete;
-  ReactOnManager &operator=(ReactOnManager &&) = delete;
+  ReactOnService(const ReactOnService &) = delete;
+  ReactOnService &operator=(const ReactOnService &) = delete;
+  ReactOnService(ReactOnService &&) = delete;
+  ReactOnService &operator=(ReactOnService &&) = delete;
 
   void RegisterReaction(const std::string &instrument_id, int max_count,
                         std::function<void()> callback);

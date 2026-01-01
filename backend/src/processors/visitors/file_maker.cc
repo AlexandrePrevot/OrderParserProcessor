@@ -332,12 +332,12 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
   Include(command);
 
   if (!added_before) {
-    InsertCode("ReactOnManager reacton_manager;", tab);
-    InsertCode("reacton_manager.WaitForCompletion();", tab);
+    InsertCode("ReactOnService reacton_service;", tab);
+    InsertCode("reacton_service.WaitForCompletion();", tab);
     code_it_--;
   }
 
-  InsertCode(std::string("reacton_manager.RegisterReaction(") + instrument_id +
+  InsertCode(std::string("reacton_service.RegisterReaction(") + instrument_id +
                  ", " + std::to_string(repeat) + ", []() {",
              tab);
   tab_to_add_++;
@@ -363,7 +363,7 @@ void FileMaker::Include(const Command &command) {
     InsertInclude("<iostream>", false);
     break;
   case Type::ReactOn:
-    InsertInclude("\"services/reacton_manager.h\"", true);
+    InsertInclude("\"services/reacton_service.h\"", true);
     break;
   default:
     break;
