@@ -214,6 +214,12 @@ void PythonApiGtw::GrpcWriterThread(
 
       } else {
         // Queue is empty, sleep briefly to avoid busy-waiting
+        // this might cause problems here as
+        // if we receive many market data in between
+        // it will be slow to consider them
+        // using a condition variable might be a good idea
+        // but not sure if this is low latency enough
+        // will keep it until optimizing
         std::this_thread::sleep_for(std::chrono::microseconds(100));
       }
     }
