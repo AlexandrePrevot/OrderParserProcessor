@@ -1,5 +1,6 @@
 set(services_list
     script_submit_service.cc
+    reacton_manager.cc
 )
 
 list(TRANSFORM services_list PREPEND "src/services/")
@@ -7,7 +8,6 @@ list(TRANSFORM services_list PREPEND "src/services/")
 set(processors_list
     script_submit_processor.cc
     common/timers.cc
-    common/reacton_manager.cc
     visitors/concrete_fiscript_visitor.cc
     visitors/file_maker.cc
 )
@@ -29,8 +29,6 @@ target_link_libraries(lib_services PUBLIC lib_grpc_messages)
 add_library(lib_processors STATIC ${processors_list})
 target_include_directories(lib_processors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/)
 target_link_libraries(lib_processors PUBLIC lib_grpc_messages)
-target_link_libraries(lib_processors PUBLIC lib_grpc_services)
-target_link_libraries(lib_processors PUBLIC gRPC::grpc++ protobuf::libprotobuf)
 target_link_libraries(lib_processors PUBLIC FiScriptGrammarLib)
 
 add_library(lib_handlers STATIC ${handlers_list})

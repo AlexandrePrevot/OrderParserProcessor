@@ -361,7 +361,7 @@ void FileMaker::Include(const Command &command) {
     InsertInclude("<iostream>", false);
     break;
   case Type::ReactOn:
-    InsertInclude("\"processors/common/reacton_manager.h\"", true);
+    InsertInclude("\"services/reacton_manager.h\"", true);
     break;
   default:
     break;

@@ -1,4 +1,4 @@
-#include "processors/common/reacton_manager.h"
+#include "services/reacton_manager.h"
 
 #include <iostream>
 #include <google/protobuf/empty.pb.h>
