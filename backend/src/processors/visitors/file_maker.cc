@@ -333,6 +333,8 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
 
   if (!added_before) {
     InsertCode("ReactOnManager reacton_manager;", tab);
+    InsertCode("reacton_manager.WaitForCompletion();", tab);
+    code_it_--;
   }
 
   InsertCode(std::string("reacton_manager.RegisterReaction(") + instrument_id +

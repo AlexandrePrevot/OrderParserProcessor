@@ -65,11 +65,6 @@ void ReactOnManager::ReadMarketDataStream() {
   internal::PriceUpdate update;
 
   while (reader->Read(&update)) {
-    // Check if we should stop reading
-    if (ShouldStopReading()) {
-      break;
-    }
-
     // Execute all registered reaction callbacks
     for (const auto &reaction : reactions_) {
       // Check if this reaction should still execute
@@ -84,11 +79,17 @@ void ReactOnManager::ReadMarketDataStream() {
       // Increment counter
       reaction->current_count++;
     }
+
+    // Check if we should stop reading after executing callbacks
+    if (ShouldStopReading()) {
+      context.TryCancel();
+      break;
+    }
   }
 
   grpc::Status status = reader->Finish();
 
-  if (!status.ok()) {
+  if (!status.ok() && status.error_code() != grpc::StatusCode::CANCELLED) {
     std::cerr << "StreamPrices RPC failed: " << status.error_message()
               << std::endl;
   }
