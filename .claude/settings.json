@@ -1,0 +1,71 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake:*)",
+      "Bash(make:*)",
+      "Bash(ctest:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(protoc:*)",
+      "Bash(ls:*)",
+      "Bash(cd:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(rm -rf:*)",
+      "Bash(docker:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Edit(.env)",
+      "Edit(*.pem)",
+      "Edit(*.key)"
+    ]
+  },
+
+  "env": {
+    "BUILD_TYPE": "Debug",
+    "CMAKE_BUILD_PARALLEL_LEVEL": "4"
+  },
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit(*.cc)|Edit(*.h)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v clang-format >/dev/null 2>&1; then clang-format -i \"$(echo \"$CLAUDE_TOOL_OUTPUT\" | jq -r '.tool_input.file_path // empty')\"; fi"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🚀 OrderParserProcessor development session started'"
+          }
+        ]
+      }
+    ]
+  },
+
+  "attribution": {
+    "commit": "🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>",
+    "pr": "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+  },
+
+  "outputStyle": "Concise"
+}

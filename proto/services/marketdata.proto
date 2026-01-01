@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "messages/price_update.proto";
+import "google/protobuf/empty.proto";
+
+package internal;
+
+
+service MarketDataService {
+    // Client calls this once and then receives a continuous stream
+    rpc StreamPrices(google.protobuf.Empty)
+        returns (stream PriceUpdate);
+}
