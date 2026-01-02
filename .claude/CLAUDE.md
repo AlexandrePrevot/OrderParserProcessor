@@ -160,6 +160,9 @@ grun FiScript <start_rule> -gui < input.txt
 - **Memory Management**: Prefer smart pointers (`std::unique_ptr`, `std::shared_ptr`)
 - **Includes**: Use project includes for local headers (e.g., `"handlers/script_submit_handler.h"`)
 - **Namespaces**: Check existing code patterns before adding new namespaces
+- **Comments**: Only add comments to explain non-obvious design choices or the reasoning behind decisions that aren't immediately clear from the code itself. Do NOT add comments that simply describe what the code does. Self-documenting code is preferred over excessive comments.
+  - **Good example**: Explaining why `TryCancel()` is used instead of `Finish()` (see `reacton_service.cc:74-78`)
+  - **Bad example**: Comments like "// Constructor" or "// Initialize the variable"
 
 ## Git Workflow
 - **Main Branch**: `main`

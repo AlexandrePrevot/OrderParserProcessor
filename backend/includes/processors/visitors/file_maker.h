@@ -24,6 +24,7 @@ private:
 
   bool MakeScheduleCommand(const Command &command);
   bool MakePrintCommand(const Command &command);
+  bool MakeReactOnCommand(const Command &command);
 
   void Include(const Command &command);
   void PlaceInclude(const std::string &include);
