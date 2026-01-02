@@ -66,6 +66,11 @@ void ReactOnService::ReadMarketDataStream() {
       reaction->current_count++;
     }
 
+    // Here we use TryCancel
+    // because Finish() waits for
+    // the server to ends its streaming
+    // while we want to cancel the subscription
+    // immediatly
     if (ShouldStopReading()) {
       context.TryCancel();
       break;
