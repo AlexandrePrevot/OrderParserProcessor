@@ -12,8 +12,8 @@
 #include "services/marketdata.grpc.pb.h"
 
 struct Reaction {
-  std::string instrument_id;  // Not used for filtering yet, but stored for future
-  int max_count;              // -1 means infinite
+  std::string instrument_id;
+  int max_count;
   std::atomic<int> current_count;
   std::function<void()> callback;
 

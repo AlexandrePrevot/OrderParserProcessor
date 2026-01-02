@@ -4,14 +4,9 @@
 #include <google/protobuf/empty.pb.h>
 
 ReactOnService::ReactOnService() : stop_(false) {
-  // Create channel to Distributor server
   channel_ = grpc::CreateChannel("localhost:50052",
                                  grpc::InsecureChannelCredentials());
-
-  // Create stub for MarketDataService
   stub_ = internal::MarketDataService::NewStub(channel_);
-
-  // Start background thread to read market data stream
   reader_thread_ = std::thread(&ReactOnService::ReadMarketDataStream, this);
 }
 
@@ -37,21 +32,17 @@ void ReactOnService::WaitForCompletion() {
 }
 
 bool ReactOnService::ShouldStopReading() {
-  // Stop if externally requested
   if (stop_) {
     return true;
   }
 
-  // Stop if all reactions have completed their max_count
   for (const auto &reaction : reactions_) {
-    // If any reaction is infinite (-1) or hasn't reached max, keep reading
     if (reaction->max_count == -1 ||
         reaction->current_count < reaction->max_count) {
       return false;
     }
   }
 
-  // All reactions are done
   return true;
 }
 
@@ -65,22 +56,16 @@ void ReactOnService::ReadMarketDataStream() {
   internal::PriceUpdate update;
 
   while (reader->Read(&update)) {
-    // Execute all registered reaction callbacks
     for (const auto &reaction : reactions_) {
-      // Check if this reaction should still execute
       if (reaction->max_count != -1 &&
           reaction->current_count >= reaction->max_count) {
-        continue;  // Skip this reaction
+        continue;
       }
 
-      // Execute the callback
       reaction->callback();
-
-      // Increment counter
       reaction->current_count++;
     }
 
-    // Check if we should stop reading after executing callbacks
     if (ShouldStopReading()) {
       context.TryCancel();
       break;
