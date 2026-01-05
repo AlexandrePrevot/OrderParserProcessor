@@ -51,6 +51,7 @@ void FileMaker::GenerateScript() const noexcept {
 
   for (const std::string &include : includes_) {
     cmd << include;
+    cmd << " ";
   }
 
   std::string command = cmd.str();
@@ -124,6 +125,10 @@ bool FileMaker::MakeLine(const Command &command) {
     return MakePrintCommand(command);
   case Type::ReactOn:
     return MakeReactOnCommand(command);
+  case Type::VariableDeclaration:
+    return MakeVariableDeclaration(command);
+  case Type::VariableAssignment:
+    return MakeVariableAssignment(command);
   default:
     break;
   }
@@ -226,16 +231,14 @@ bool FileMaker::MakeScheduleCommand(const Command &command) {
 
   long tab = code_it_->first;
 
-  const bool added_before = history_.find(command.type) != std::cend(history_);
-  Include(command);
+  AddTimerManager(command);
 
-  if (!added_before) {
-    InsertCode("TimerManager timer_manager;", tab);
-    InsertCode("timer_manager.WaitTillLast(0);", tab);
-    code_it_--;
-  }
+  CollectRequiredManagers(command);
 
-  InsertCode("timer_manager.CreateTimer([]() {", tab);
+  std::string lambda_captures = GenerateLambdaCaptures();
+
+  InsertCode("timer_manager.CreateTimer(" + lambda_captures + "() mutable {", tab);
+
   tab_to_add_++;
   for (const auto &sub_command : command.in_scope) {
     MakeLine(sub_command);
@@ -328,17 +331,14 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
 
   long tab = code_it_->first;
 
-  const bool added_before = history_.find(command.type) != std::cend(history_);
-  Include(command);
+  AddReactOnService(command);
 
-  if (!added_before) {
-    InsertCode("ReactOnService reacton_service;", tab);
-    InsertCode("reacton_service.WaitForCompletion();", tab);
-    code_it_--;
-  }
+  CollectRequiredManagers(command);
+
+  std::string lambda_captures = GenerateLambdaCaptures();
 
   InsertCode(std::string("reacton_service.RegisterReaction(") + instrument_id +
-                 ", " + std::to_string(repeat) + ", []() {",
+                 ", " + std::to_string(repeat) + ", " + lambda_captures + "() mutable {",
              tab);
   tab_to_add_++;
   for (const auto &sub_command : command.in_scope) {
@@ -348,6 +348,208 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
   InsertCode("});", tab);
 
   return true;
+}
+
+VariableType FileMaker::InferExpressionType(const ExprNode* expr) const {
+  if (!expr) {
+    return VariableType::Numeric;
+  }
+
+  switch (expr->node_type) {
+    case ExprNode::Type::Literal: {
+      const auto* lit = static_cast<const LiteralNode*>(expr);
+      return lit->is_string ? VariableType::String : VariableType::Numeric;
+    }
+
+    case ExprNode::Type::VariableRef: {
+      const auto* var_ref = static_cast<const VariableRefNode*>(expr);
+      auto it = variable_types_.find(var_ref->var_name);
+      if (it != variable_types_.end()) {
+        return it->second;
+      }
+      return VariableType::Numeric;
+    }
+
+    case ExprNode::Type::BinaryOp: {
+      const auto* binop = static_cast<const BinaryOpNode*>(expr);
+      VariableType left_type = InferExpressionType(binop->left.get());
+      VariableType right_type = InferExpressionType(binop->right.get());
+
+      if (binop->op == "+" || binop->op == "-") {
+        if (left_type == VariableType::String || right_type == VariableType::String) {
+          return VariableType::String;
+        }
+      }
+      return left_type;
+    }
+
+    case ExprNode::Type::Paren: {
+      const auto* paren = static_cast<const ParenExprNode*>(expr);
+      return InferExpressionType(paren->inner.get());
+    }
+
+    default:
+      return VariableType::Numeric;
+  }
+}
+
+std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType context_type) const {
+  if (!expr) {
+    return "";
+  }
+
+  // important to note here :
+  // will just diplay "0" and "1" for booleans in strings
+  // once booleans are introduced it should be considered so that
+  // is shows "true" or "false"
+
+  switch (expr->node_type) {
+    case ExprNode::Type::Literal: {
+      const auto* lit = static_cast<const LiteralNode*>(expr);
+      if (context_type == VariableType::String) {
+        if (lit->is_string) {
+          return "std::string(" + lit->value + ")";
+        } else {
+          return "std::to_string(" + lit->value + ")";
+        }
+      } else {
+        return lit->value;
+      }
+    }
+
+    case ExprNode::Type::VariableRef: {
+      const auto* var_ref = static_cast<const VariableRefNode*>(expr);
+      if (context_type == VariableType::String) {
+        auto it = variable_types_.find(var_ref->var_name);
+        if (it != variable_types_.end() && it->second == VariableType::Numeric) {
+          return "std::to_string(" + var_ref->var_name + ")";
+        }
+      }
+      return var_ref->var_name;
+    }
+
+    case ExprNode::Type::BinaryOp: {
+      const auto* binop = static_cast<const BinaryOpNode*>(expr);
+      VariableType left_type = InferExpressionType(binop->left.get());
+      VariableType right_type = InferExpressionType(binop->right.get());
+
+      if (binop->op == "+" && (left_type == VariableType::String || right_type == VariableType::String)) {
+        std::string left_code = GenerateExpressionCode(binop->left.get(), VariableType::String);
+        std::string right_code = GenerateExpressionCode(binop->right.get(), VariableType::String);
+        return left_code + " + " + right_code;
+      } else if (binop->op == "*" || binop->op == "/") {
+        std::string left_code = GenerateExpressionCode(binop->left.get(), VariableType::Numeric);
+        std::string right_code = GenerateExpressionCode(binop->right.get(), VariableType::Numeric);
+        return left_code + " " + binop->op + " " + right_code;
+      } else {
+        std::string left_code = GenerateExpressionCode(binop->left.get(), context_type);
+        std::string right_code = GenerateExpressionCode(binop->right.get(), context_type);
+        return left_code + " " + binop->op + " " + right_code;
+      }
+    }
+
+    case ExprNode::Type::Paren: {
+      const auto* paren = static_cast<const ParenExprNode*>(expr);
+      VariableType paren_result_type = InferExpressionType(paren->inner.get());
+      std::string inner_code = GenerateExpressionCode(paren->inner.get(), paren_result_type);
+      std::string paren_expr = "(" + inner_code + ")";
+
+      if (context_type == VariableType::String && paren_result_type == VariableType::Numeric) {
+        return "std::to_string" + paren_expr;
+      } else if (context_type == VariableType::String && paren_result_type == VariableType::String) {
+        return "std::string" + paren_expr;
+      }
+      return paren_expr;
+    }
+
+    default:
+      return "";
+  }
+}
+
+bool FileMaker::MakeVariableDeclaration(const Command &command) {
+  long tab = code_it_->first;
+
+  VariableType var_type = InferExpressionType(command.expression.get());
+
+  auto it = variable_types_.find(command.variable_name);
+  bool already_declared = (it != variable_types_.end());
+
+  variable_types_[command.variable_name] = var_type;
+
+  if (var_type == VariableType::String) {
+    std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
+    if (already_declared) {
+      InsertCode(command.variable_name + " = " + expr_code + ";", tab);
+    } else {
+      InsertCode("std::string " + command.variable_name + " = " + expr_code + ";", tab);
+      const bool string_included_before = history_.find(Command::CommandType::VariableDeclaration) != std::cend(history_);
+      if (!string_included_before) {
+        InsertInclude("<string>", false);
+        history_.insert(Command::CommandType::VariableDeclaration);
+      }
+    }
+  } else {
+    std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::Numeric);
+    if (already_declared) {
+      InsertCode(command.variable_name + " = " + expr_code + ";", tab);
+    } else {
+      InsertCode("double " + command.variable_name + " = " + expr_code + ";", tab);
+    }
+  }
+
+  return true;
+}
+
+bool FileMaker::MakeVariableAssignment(const Command &command) {
+  long tab = code_it_->first;
+
+  auto it = variable_types_.find(command.variable_name);
+  if (it == variable_types_.end()) {
+    return false;
+  }
+
+  VariableType var_type = it->second;
+
+  if (var_type == VariableType::String) {
+    std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
+    if (command.compound_op == "+=") {
+      InsertCode(command.variable_name + " += " + expr_code + ";", tab);
+    } else {
+      InsertCode(command.variable_name + " = " + expr_code + ";", tab);
+    }
+  } else {
+    std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::Numeric);
+    InsertCode(command.variable_name + " " + command.compound_op + " " + expr_code + ";", tab);
+  }
+
+  return true;
+}
+
+void FileMaker::AddTimerManager(const Command &command) {
+  const bool added_before =
+      history_.find(Command::CommandType::Schedule) != std::cend(history_);
+  const long tab = code_it_->first;
+  Include(command);
+
+  if (!added_before) {
+    InsertCode("TimerManager timer_manager;", tab);
+    InsertCode("timer_manager.WaitTillLast(0);", tab);
+    code_it_--;
+  }
+}
+
+void FileMaker::AddReactOnService(const Command &command) {
+  const bool added_before =
+      history_.find(Command::CommandType::ReactOn) != std::cend(history_);
+  const long tab = code_it_->first;
+  Include(command);
+
+  if (!added_before) {
+    InsertCode("ReactOnService reacton_service;", tab);
+    InsertCode("reacton_service.WaitForCompletion();", tab);
+    code_it_--;
+  }
 }
 
 void FileMaker::Include(const Command &command) {
@@ -370,6 +572,42 @@ void FileMaker::Include(const Command &command) {
   }
 
   history_.insert(command.type);
+}
+
+// to avoid defining managers to soon (which take multiple threads)
+// it is better to recursively check the subcommand
+// to know if they are using the manager/service (such as Timer or ReactOn)
+// then create them in the code
+void FileMaker::CollectRequiredManagers(const Command &command) {
+  using Type = Command::CommandType;
+
+  for (const auto &sub_command : command.in_scope) {
+    if (sub_command.type == Type::Schedule) {
+      active_managers_.insert(Type::Schedule);
+      AddTimerManager(sub_command);
+    } else if (sub_command.type == Type::ReactOn) {
+      active_managers_.insert(Type::ReactOn);
+      AddReactOnService(sub_command);
+    }
+    CollectRequiredManagers(sub_command);
+  }
+}
+
+std::string FileMaker::GenerateLambdaCaptures() const {
+  std::string captures = "[=";
+
+  if (active_managers_.find(Command::CommandType::Schedule) != active_managers_.end() &&
+      history_.find(Command::CommandType::Schedule) != history_.end()) {
+    captures += ", &timer_manager";
+  }
+
+  if (active_managers_.find(Command::CommandType::ReactOn) != active_managers_.end() &&
+      history_.find(Command::CommandType::ReactOn) != history_.end()) {
+    captures += ", &reacton_service";
+  }
+
+  captures += "]";
+  return captures;
 }
 
 void FileMaker::SetGRPC() {

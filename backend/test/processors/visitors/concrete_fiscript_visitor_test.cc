@@ -4,8 +4,8 @@
 #include "processors/visitors/concrete_fiscript_visitor.h"
 
 constexpr std::string_view kScheduleThenPrint =
-    "Schedule(Start, 5s, 4) { Print(\"Just a test!\")}"
-    "Print(\"Just another test!\")";
+    "Schedule(Start, 5s, 4) { Print(\"Just a test!\") }\n"
+    "Print(\"Just another test!\")\n";
 
 TEST(ConcreteFileScriptVisitorTest, CheckCommand) {
   ConcreteFiScriptVisitor visitor;

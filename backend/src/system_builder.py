@@ -28,6 +28,9 @@ args = parser.parse_args()
 script_name = args.scriptName[0]
 includes = args.includes
 
+print(f"building project for {script_name}")
+print(f"includes are {includes}")
+
 project_root = os.getenv("ORDER_PARSER_PROCESSOR_ROOT")
 output_root = project_root + "/../output_bin"
 
@@ -71,6 +74,8 @@ project_name = script_name
 for include in includes:
     include = include.removesuffix(".h")
     include = include.strip('"')
+
+    print(f"copying include {include}")
 
     # Check if it's a service or processor include
     if include.startswith("services/"):
