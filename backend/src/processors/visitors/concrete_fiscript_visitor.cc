@@ -46,22 +46,19 @@ ConcreteFiScriptVisitor::visitStatement(FiScriptParser::StatementContext *ctx) {
   FiScriptParser::VariableDeclarationContext *varDecl = ctx->variableDeclaration();
   FiScriptParser::VariableAssignmentContext *varAssign = ctx->variableAssignment();
 
-  Command command;
   if (reacton != nullptr) {
     return visitReacton(reacton);
   } else if (schedule != nullptr) {
     return visitSchedule(schedule);
   } else if (print != nullptr) {
-    command.type = Command::CommandType::Print;
-    command.arguments =
-        std::any_cast<std::vector<std::string>>(visitPrint(print));
+    return visitPrint(print);
   } else if (varDecl != nullptr) {
     return visitVariableDeclaration(varDecl);
   } else if (varAssign != nullptr) {
     return visitVariableAssignment(varAssign);
   }
 
-  return command;
+  return Command();
 }
 
 std::any
@@ -94,7 +91,13 @@ ConcreteFiScriptVisitor::visitReacton(FiScriptParser::ReactonContext *ctx) {
 
 std::any
 ConcreteFiScriptVisitor::visitPrint(FiScriptParser::PrintContext *ctx) {
-  return visitArgumentList(ctx->argumentList());
+  Command command;
+  command.type = Command::CommandType::Print;
+
+  auto expr_result = visitExpression(ctx->expression());
+  command.expression = std::any_cast<std::shared_ptr<ExprNode>>(expr_result);
+
+  return command;
 }
 
 std::any ConcreteFiScriptVisitor::visitArgumentList(

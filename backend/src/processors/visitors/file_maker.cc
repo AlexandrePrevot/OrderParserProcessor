@@ -252,38 +252,20 @@ bool FileMaker::MakeScheduleCommand(const Command &command) {
   return true;
 }
 
-bool PrintArgsValid(const std::vector<std::string> &args) {
-  if (args.size() != 1) {
-    std::cout << "currently support only 1 argument for Print" << std::endl;
-    return false;
-  }
-
-  if (args[0].size() < 2) {
-    std::cout << "only strings are supported to print" << std::endl;
-    return false;
-  }
-
-  if (args[0].front() != '"' || args[0].back() != '"') {
-    std::cout << "only strings are supported to print (should start and end "
-                 "with '\"')"
-              << std::endl;
-    return false;
-  }
-
-  return true;
-}
-
 bool FileMaker::MakePrintCommand(const Command &command) {
-  if (!PrintArgsValid(command.arguments))
+  if (!command.expression) {
+    std::cout << "Print command missing expression" << std::endl;
     return false;
+  }
 
   std::cout << "adding the print command" << std::endl;
 
   Include(command);
 
   long tab = code_it_->first;
-  InsertCode(std::string("std::cout << ") + command.arguments[0] +
-                 std::string(" << std::endl;"),
+
+  std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
+  InsertCode(std::string("std::cout << (") + expr_code + std::string(") << std::endl;"),
              tab);
 
   return true;

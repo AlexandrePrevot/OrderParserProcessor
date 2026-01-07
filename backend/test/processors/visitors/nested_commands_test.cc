@@ -29,7 +29,7 @@ TEST(NestedCommandsTest, ReactOnInsideSchedule) {
   EXPECT_NE(generated.find("reacton_service"), std::string::npos);
   EXPECT_NE(generated.find("CreateTimer([=, &reacton_service]()"),
             std::string::npos);
-  EXPECT_NE(generated.find("RegisterReaction(\"AAPL\", 5, [=, &timer_manager, &reacton_service]()"),
+  EXPECT_NE(generated.find("RegisterReaction(\"AAPL\", 5, [=, &reacton_service]()"),
             std::string::npos);
 }
 
@@ -58,7 +58,7 @@ TEST(NestedCommandsTest, ScheduleInsideReactOn) {
   EXPECT_NE(generated.find("reacton_service"), std::string::npos);
   EXPECT_NE(generated.find("RegisterReaction(\"AAPL\", 5, [=, &timer_manager]()"),
             std::string::npos);
-  EXPECT_NE(generated.find("CreateTimer([=]()"), std::string::npos);
+  EXPECT_NE(generated.find("CreateTimer([=, &timer_manager]()"), std::string::npos);
 }
 
 TEST(NestedCommandsTest, OnlyScheduleNoNesting) {
@@ -189,7 +189,7 @@ TEST(NestedCommandsTest, ComplexNestedWithScheduleAndReactOn) {
 
   EXPECT_NE(generated.find("RegisterReaction(\"AAPL\", 5, [=, &timer_manager, &reacton_service]()"),
             std::string::npos);
-  EXPECT_NE(generated.find("CreateTimer([=]()"), std::string::npos);
+  EXPECT_NE(generated.find("CreateTimer([=, &timer_manager, &reacton_service]()"), std::string::npos);
   EXPECT_NE(generated.find("RegisterReaction(\"AAPL\", 3, [=, &timer_manager, &reacton_service]()"),
             std::string::npos);
 }
@@ -231,19 +231,19 @@ TEST(NestedCommandsTest, FullScriptFromFile) {
   EXPECT_NE(generated.find("reacton_service"), std::string::npos);
   EXPECT_NE(generated.find("std::string myStr"), std::string::npos);
 
-  EXPECT_NE(generated.find("std::cout << \"Heyy !!\""), std::string::npos);
+  EXPECT_NE(generated.find("std::cout << (std::string(\"Heyy !!\"))"), std::string::npos);
 
   size_t nested_reacton_outer = generated.find("RegisterReaction(\"AAPL\", 5, [=, &timer_manager, &reacton_service]()");
   EXPECT_NE(nested_reacton_outer, std::string::npos);
 
-  size_t nested_schedule = generated.find("CreateTimer([=]()");
+  size_t nested_schedule = generated.find("CreateTimer([=, &timer_manager, &reacton_service]()");
   EXPECT_NE(nested_schedule, std::string::npos);
   EXPECT_GT(nested_schedule, nested_reacton_outer);
 
   size_t nested_reacton_inner = generated.find("RegisterReaction(\"AAPL\", 3, [=, &timer_manager, &reacton_service]()");
   EXPECT_NE(nested_reacton_inner, std::string::npos);
 
-  size_t standalone_schedule = generated.find("CreateTimer([=]()");
+  size_t standalone_schedule = generated.find("CreateTimer([=, &timer_manager, &reacton_service]()");
   EXPECT_NE(standalone_schedule, std::string::npos);
 
   size_t standalone_reacton = generated.rfind("RegisterReaction(\"AAPL\", 3, [=, &timer_manager, &reacton_service]()");

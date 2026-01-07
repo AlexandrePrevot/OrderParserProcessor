@@ -12,7 +12,7 @@ statement
 
 schedule   : SCHEDULE argumentList block NEWLINE* ;
 reacton   : REACTON argumentList block NEWLINE* ;
-print   : PRINT argumentList NEWLINE* ;
+print   : PRINT '(' expression ')' NEWLINE* ;
 
 variableDeclaration : IDENTIFIER '=' expression NEWLINE ;
 variableAssignment : IDENTIFIER COMPOUND_OP expression NEWLINE ;
