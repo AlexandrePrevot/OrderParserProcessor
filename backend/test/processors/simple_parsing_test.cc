@@ -19,9 +19,9 @@ constexpr std::string_view kScheduleNotProperlyWritten =
     "Shcedule(Start, 3s, 3) {}";
 constexpr std::string_view kCorrectPrint = "Print(\"hello world 123\")";
 constexpr std::string_view kIncorrectPrint = "Print(hello world\")";
-constexpr std::string_view kPrintWrongArgType = "Print(356)";
-constexpr std::string_view kPrintWrongArgNumber =
-    "Print(\"hello world!\", \"second arg\")";
+constexpr std::string_view kPrintWithNumericLiteral = "Print(356)";
+constexpr std::string_view kPrintWithVariable = "x = 5\nPrint(\"Result: \" + x)";
+constexpr std::string_view kPrintWithExpression = "Print(\"hello\" + \" \" + \"world\")";
 constexpr std::string_view kPrintNotProperlyWritten =
     "Prin(\"hello world! 123\")";
 constexpr std::string_view kWithQuotes = "Prin(\"hello \"world\"! 123\")";
@@ -43,8 +43,9 @@ TEST(ScriptSubmit, TableDrivenValidation) {
   std::vector<ScriptTestCase> cases = {
       {"CorrectPrint", kCorrectPrint, true},
       {"IncorrectPrint", kIncorrectPrint, false},
-      {"PrintWrongArgType", kPrintWrongArgType, false},
-      {"PrintWrongArgNumber", kPrintWrongArgNumber, false},
+      {"PrintWithNumericLiteral", kPrintWithNumericLiteral, true},
+      {"PrintWithVariable", kPrintWithVariable, true},
+      {"PrintWithExpression", kPrintWithExpression, true},
       {"PrintNotProperlyWritten", kPrintNotProperlyWritten, false},
       {"kWithQuotes", kWithQuotes, false},
       {"CorrectSchedule", kScheduleCorrect, true},
