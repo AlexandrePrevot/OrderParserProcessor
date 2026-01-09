@@ -1,0 +1,13 @@
+myFloat = 18.5
+myInt3 = 18
+val = 0.5 + myInt3 * 2 + myFloat
+val = myInt3
+another = val
+another *= 3.8
+another += 3.8
+another -= 3.8
+another /= myFloat
+myString = "hello" + 3
+myString = 3
+myString = "another"
+Print("Test completed")

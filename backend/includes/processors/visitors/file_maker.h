@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -25,9 +26,18 @@ private:
   bool MakeScheduleCommand(const Command &command);
   bool MakePrintCommand(const Command &command);
   bool MakeReactOnCommand(const Command &command);
+  bool MakeVariableDeclaration(const Command &command);
+  bool MakeVariableAssignment(const Command &command);
+
+  void AddTimerManager(const Command &command);
+  void AddReactOnService(const Command &command);
+
+  VariableType InferExpressionType(const ExprNode* expr) const;
+  std::string GenerateExpressionCode(const ExprNode* expr, VariableType context_type) const;
 
   void Include(const Command &command);
-  void PlaceInclude(const std::string &include);
+  void CollectRequiredManagers(const Command &command);
+  std::string GenerateLambdaCaptures() const;
 
   inline void InsertCode(const std::string &code, long tab) {
     code_.insert(code_it_, {tab + tab_to_add_, code});
@@ -45,6 +55,8 @@ private:
   std::list<std::pair<long, std::string>> code_;
   std::unordered_set<std::string> includes_;
   std::unordered_set<Command::CommandType> history_;
+  std::unordered_set<Command::CommandType> active_managers_;
+  std::map<std::string, VariableType> variable_types_;
   std::string output_;
   bool compiled_;
   long tab_to_add_;

@@ -6,30 +6,48 @@ statement
     : schedule
     | reacton
     | print
+    | variableDeclaration
+    | variableAssignment
     ;
 
-schedule   : SCHEDULE argumentList block ;
-reacton   : REACTON argumentList block ;
-print   : PRINT argumentList;
+schedule   : SCHEDULE argumentList block NEWLINE* ;
+reacton   : REACTON argumentList block NEWLINE* ;
+print   : PRINT '(' expression ')' NEWLINE* ;
+
+variableDeclaration : IDENTIFIER '=' expression NEWLINE ;
+variableAssignment : IDENTIFIER COMPOUND_OP expression NEWLINE ;
+
+expression
+    : '(' expression ')'                          # ParenExpression
+    | expression ('*' | '/') expression           # MulDiv
+    | expression ('+' | '-') expression           # AddSub
+    | IDENTIFIER                                  # VariableRef
+    | NUMBER                                      # NumericLiteral
+    | STRING_LITERAL                              # StringLiteral
+    ;
 
 block
-    : '{' statement* '}'
+    : '{' NEWLINE* statement* NEWLINE* '}'
     ;
 
 
 argumentList : '(' argumentComposition ')' ;
-argumentComposition : ARGUMENT (COMMA ARGUMENT)*;
+argumentComposition : argument (COMMA argument)* ;
+argument : IDENTIFIER | NUMBER | ARGUMENT_TOKEN | STRING_LITERAL ;
 
 
 fragment WORD : [a-zA-Z] ;
-fragment NUMBER : [0-9] ;
-fragment WORD_OR_NBR : (WORD | NUMBER)+ ;
-fragment STRING : '"' (~['"'])* '"' ;
+fragment DIGIT : [0-9] ;
 
 
-WHITESPACE : [ \t\r\n]+ -> skip ;
 SCHEDULE : 'Schedule' ;
 REACTON : 'ReactOn' ;
 PRINT : 'Print' ;
-ARGUMENT    : (STRING | WORD_OR_NBR) ;
+COMPOUND_OP : '+=' | '-=' | '*=' | '/=' ;
+IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
+ARGUMENT_TOKEN : DIGIT+ [a-zA-Z_] [a-zA-Z0-9_]* ;
+NUMBER : DIGIT+ ('.' DIGIT+)? ;
+STRING_LITERAL : '"' (~['"\\] | '\\' .)* '"' ;
 COMMA   : ',' ;
+NEWLINE : [\r\n]+ ;
+WHITESPACE : [ \t]+ -> skip ;

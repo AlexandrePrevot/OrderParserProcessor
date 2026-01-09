@@ -61,12 +61,16 @@ private:
   using TaskPtr = std::shared_ptr<Task>;
   std::priority_queue<TaskPtr, std::vector<TaskPtr>, TimerCmp> tasks_to_do_;
 
-  // lock mutex before calling
+  // lock mutex before calling Push or Pop
   void inline PushTask(const std::chrono::steady_clock::time_point &time_to_run,
                        const std::chrono::milliseconds &interval,
                        const std::function<void()> &task, int repeat) {
-    tasks_to_do_.emplace(
+    PushTaskPtr(
         std::make_shared<Task>(Task{time_to_run, interval, task, repeat}));
+  }
+
+  void inline PushTaskPtr(const TaskPtr& task) {
+    tasks_to_do_.push(task);
     active_timer_count_++;
     timer_count_++;
   }

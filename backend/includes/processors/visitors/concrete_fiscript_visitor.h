@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "command.h"
 
@@ -24,13 +25,28 @@ private:
 
   virtual std::any visitPrint(FiScriptParser::PrintContext *context);
 
+  virtual std::any visitVariableDeclaration(FiScriptParser::VariableDeclarationContext *context);
+
+  virtual std::any visitVariableAssignment(FiScriptParser::VariableAssignmentContext *context);
+
   virtual std::any
   visitArgumentList(FiScriptParser::ArgumentListContext *context);
 
   virtual std::any
   visitArgumentComposition(FiScriptParser::ArgumentCompositionContext *context);
 
+  virtual std::any visitArgument(FiScriptParser::ArgumentContext *context);
+
   virtual std::any visitBlock(FiScriptParser::BlockContext *context);
 
+  virtual std::any visitExpression(FiScriptParser::ExpressionContext *context);
+  virtual std::any visitParenExpression(FiScriptParser::ParenExpressionContext *context);
+  virtual std::any visitMulDiv(FiScriptParser::MulDivContext *context);
+  virtual std::any visitAddSub(FiScriptParser::AddSubContext *context);
+  virtual std::any visitVariableRef(FiScriptParser::VariableRefContext *context);
+  virtual std::any visitNumericLiteral(FiScriptParser::NumericLiteralContext *context);
+  virtual std::any visitStringLiteral(FiScriptParser::StringLiteralContext *context);
+
   std::vector<Command> commands_list_;
+  std::map<std::string, VariableType> variable_types_;
 };
