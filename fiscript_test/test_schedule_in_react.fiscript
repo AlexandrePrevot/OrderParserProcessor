@@ -1,0 +1,21 @@
+Print("Heyy !!")
+
+myStr = "str" + "03" + ("3" + 4)
+myOtherStr = myStr + 3
+Voila = "other test"
+
+myDouble = 5.3
+
+Print(myStr + "   \n" + myDouble)
+
+
+ReactOn("xxx", 1) {
+    myDouble += 1
+    Print("Received marketdata, starting timer")
+
+    Schedule(Start, 3s, 3) {
+        myDouble += 20
+        myDouble -= 1
+        Print("Sending buy order with quantity " + myDouble)
+    }
+}
