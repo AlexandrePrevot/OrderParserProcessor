@@ -381,9 +381,11 @@ std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType
   }
 
   // important to note here :
-  // will just diplay "0" and "1" for booleans in strings
+  // 1 - will just diplay "0" and "1" for booleans in strings
   // once booleans are introduced it should be considered so that
   // is shows "true" or "false"
+  // 2 - it generates expression code for numbers starting with 0 like 034
+  // acceptable yet since c++ compiler will just interpret it as 34
 
   switch (expr->node_type) {
     case ExprNode::Type::Literal: {

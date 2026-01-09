@@ -128,10 +128,8 @@ std::any ConcreteFiScriptVisitor::visitVariableDeclaration(
   command.type = Command::CommandType::VariableDeclaration;
   command.variable_name = ctx->IDENTIFIER()->getText();
 
-  // the trick here is that it will call "visit(expression)"
-  // so it will check what is the type of the expression DYNAMICALLY
-  // thanks to alternative labels (see .g4 file with the #MulDiv etc...)
-  // which will call visitXXX (where XXX is AlternativeLabel name)
+  // the trick here is that it will call "visit(expression)" (check comments)
+  // on ::visitExpression
   auto expr_result = visitExpression(ctx->expression());
   command.expression = std::any_cast<std::shared_ptr<ExprNode>>(expr_result);
 
@@ -160,6 +158,9 @@ ConcreteFiScriptVisitor::visitBlock(FiScriptParser::BlockContext *ctx) {
 }
 
 std::any ConcreteFiScriptVisitor::visitExpression(FiScriptParser::ExpressionContext *ctx) {
+  // it will check what is the type of the expression DYNAMICALLY
+  // thanks to alternative labels (see .g4 file with the #MulDiv etc...)
+  // which will call visitXXX (where XXX is AlternativeLabel name)
   return visit(ctx);
 }
 

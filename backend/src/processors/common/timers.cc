@@ -65,8 +65,8 @@ void TimerManager::Run() {
     // because WaitTillFinished() can have spurious wake
     // during execution of a repeating job
     if (job->repeat == -1 || --job->repeat > 0) {
-      PushTask(job->time_to_run + job->interval, job->interval, job->task,
-               job->repeat);
+      job->time_to_run += job->interval;
+      PushTaskPtr(job);
     }
 
     // this is not correct

@@ -61,6 +61,8 @@ private:
   bool compiled_;
   long tab_to_add_;
 
+  // to know at which line the includes are
   std::list<std::pair<long, std::string>>::iterator includes_it_;
+  // to know at which line the code in main is
   std::list<std::pair<long, std::string>>::iterator code_it_;
 };
