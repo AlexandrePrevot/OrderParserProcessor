@@ -10,4 +10,12 @@ another /= myFloat
 myString = "hello" + 3
 myString = 3
 myString = "another"
+
+
+Schedule(Start, 1s, 1) {
+    should_work = 123
+}
+
+should_work = 2
+
 Print("Test completed")
