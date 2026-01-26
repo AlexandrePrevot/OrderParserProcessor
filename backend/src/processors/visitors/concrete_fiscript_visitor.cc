@@ -206,12 +206,44 @@ std::any ConcreteFiScriptVisitor::visitVariableRef(FiScriptParser::VariableRefCo
 
 std::any ConcreteFiScriptVisitor::visitNumericLiteral(FiScriptParser::NumericLiteralContext *ctx) {
   std::string value = ctx->NUMBER()->getText();
-  std::shared_ptr<ExprNode> node = std::make_shared<LiteralNode>(value, false);
+  std::shared_ptr<ExprNode> node = std::make_shared<LiteralNode>(value, false, false);
   return node;
 }
 
 std::any ConcreteFiScriptVisitor::visitStringLiteral(FiScriptParser::StringLiteralContext *ctx) {
   std::string value = ctx->STRING_LITERAL()->getText();
-  std::shared_ptr<ExprNode> node = std::make_shared<LiteralNode>(value, true);
+  std::shared_ptr<ExprNode> node = std::make_shared<LiteralNode>(value, true, false);
+  return node;
+}
+
+std::any ConcreteFiScriptVisitor::visitBooleanLiteral(FiScriptParser::BooleanLiteralContext *ctx) {
+  std::string value = ctx->BOOL_LITERAL()->getText();
+  std::shared_ptr<ExprNode> node = std::make_shared<LiteralNode>(value, false, true);
+  return node;
+}
+
+std::any ConcreteFiScriptVisitor::visitComparison(FiScriptParser::ComparisonContext *ctx) {
+  auto left_result = visitExpression(ctx->expression(0));
+  auto right_result = visitExpression(ctx->expression(1));
+
+  auto left = std::any_cast<std::shared_ptr<ExprNode>>(left_result);
+  auto right = std::any_cast<std::shared_ptr<ExprNode>>(right_result);
+
+  std::string op = ctx->children[1]->getText();
+
+  std::shared_ptr<ExprNode> node = std::make_shared<BinaryOpNode>(op, left, right);
+  return node;
+}
+
+std::any ConcreteFiScriptVisitor::visitLogicalOp(FiScriptParser::LogicalOpContext *ctx) {
+  auto left_result = visitExpression(ctx->expression(0));
+  auto right_result = visitExpression(ctx->expression(1));
+
+  auto left = std::any_cast<std::shared_ptr<ExprNode>>(left_result);
+  auto right = std::any_cast<std::shared_ptr<ExprNode>>(right_result);
+
+  std::string op = ctx->children[1]->getText();
+
+  std::shared_ptr<ExprNode> node = std::make_shared<BinaryOpNode>(op, left, right);
   return node;
 }

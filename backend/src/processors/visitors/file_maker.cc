@@ -8,6 +8,7 @@
 #include <vector>
 
 constexpr std::string_view kEndIncludes = "// ----- end includes";
+constexpr std::string_view kBoolToStringTernary = " ? \"True\" : \"False\"";
 
 FileMaker::FileMaker(const std::vector<Command> &commands) {
   compiled_ = true;
@@ -340,6 +341,9 @@ VariableType FileMaker::InferExpressionType(const ExprNode* expr) const {
   switch (expr->node_type) {
     case ExprNode::Type::Literal: {
       const auto* lit = static_cast<const LiteralNode*>(expr);
+      if (lit->is_boolean) {
+        return VariableType::Boolean;
+      }
       return lit->is_string ? VariableType::String : VariableType::Numeric;
     }
 
@@ -356,6 +360,15 @@ VariableType FileMaker::InferExpressionType(const ExprNode* expr) const {
       const auto* binop = static_cast<const BinaryOpNode*>(expr);
       VariableType left_type = InferExpressionType(binop->left.get());
       VariableType right_type = InferExpressionType(binop->right.get());
+
+      if (binop->op == ">" || binop->op == "<" || binop->op == ">=" ||
+          binop->op == "<=" || binop->op == "==" || binop->op == "!=") {
+        return VariableType::Boolean;
+      }
+
+      if (binop->op == "and" || binop->op == "or") {
+        return VariableType::Boolean;
+      }
 
       if (binop->op == "+" || binop->op == "-") {
         if (left_type == VariableType::String || right_type == VariableType::String) {
@@ -380,16 +393,18 @@ std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType
     return "";
   }
 
-  // important to note here :
-  // 1 - will just diplay "0" and "1" for booleans in strings
-  // once booleans are introduced it should be considered so that
-  // is shows "true" or "false"
-  // 2 - it generates expression code for numbers starting with 0 like 034
-  // acceptable yet since c++ compiler will just interpret it as 34
-
   switch (expr->node_type) {
     case ExprNode::Type::Literal: {
       const auto* lit = static_cast<const LiteralNode*>(expr);
+
+      if (lit->is_boolean) {
+        std::string cpp_bool = (lit->value == "True") ? "true" : "false";
+        if (context_type == VariableType::String) {
+          return "std::string(\"" + lit->value + "\")";
+        }
+        return cpp_bool;
+      }
+
       if (context_type == VariableType::String) {
         if (lit->is_string) {
           return "std::string(" + lit->value + ")";
@@ -405,8 +420,12 @@ std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType
       const auto* var_ref = static_cast<const VariableRefNode*>(expr);
       if (context_type == VariableType::String) {
         auto it = variable_types_.find(var_ref->var_name);
-        if (it != variable_types_.end() && it->second == VariableType::Numeric) {
-          return "std::to_string(" + var_ref->var_name + ")";
+        if (it != variable_types_.end()) {
+          if (it->second == VariableType::Numeric) {
+            return "std::to_string(" + var_ref->var_name + ")";
+          } else if (it->second == VariableType::Boolean) {
+            return "(" + var_ref->var_name + std::string(kBoolToStringTernary) + ")";
+          }
         }
       }
       return var_ref->var_name;
@@ -417,7 +436,32 @@ std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType
       VariableType left_type = InferExpressionType(binop->left.get());
       VariableType right_type = InferExpressionType(binop->right.get());
 
-      if (binop->op == "+" && (left_type == VariableType::String || right_type == VariableType::String)) {
+      if (binop->op == "and") {
+        std::string left_code = GenerateExpressionCode(binop->left.get(), VariableType::Boolean);
+        std::string right_code = GenerateExpressionCode(binop->right.get(), VariableType::Boolean);
+        std::string result = left_code + " && " + right_code;
+        if (context_type == VariableType::String) {
+          return "(" + result + std::string(kBoolToStringTernary) + ")";
+        }
+        return result;
+      } else if (binop->op == "or") {
+        std::string left_code = GenerateExpressionCode(binop->left.get(), VariableType::Boolean);
+        std::string right_code = GenerateExpressionCode(binop->right.get(), VariableType::Boolean);
+        std::string result = left_code + " || " + right_code;
+        if (context_type == VariableType::String) {
+          return "(" + result + std::string(kBoolToStringTernary) + ")";
+        }
+        return result;
+      } else if (binop->op == ">" || binop->op == "<" || binop->op == ">=" ||
+                 binop->op == "<=" || binop->op == "==" || binop->op == "!=") {
+        std::string left_code = GenerateExpressionCode(binop->left.get(), left_type);
+        std::string right_code = GenerateExpressionCode(binop->right.get(), right_type);
+        std::string result = left_code + " " + binop->op + " " + right_code;
+        if (context_type == VariableType::String) {
+          return "(" + result + std::string(kBoolToStringTernary) + ")";
+        }
+        return result;
+      } else if (binop->op == "+" && (left_type == VariableType::String || right_type == VariableType::String)) {
         std::string left_code = GenerateExpressionCode(binop->left.get(), VariableType::String);
         std::string right_code = GenerateExpressionCode(binop->right.get(), VariableType::String);
         return left_code + " + " + right_code;
@@ -442,6 +486,8 @@ std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType
         return "std::to_string" + paren_expr;
       } else if (context_type == VariableType::String && paren_result_type == VariableType::String) {
         return "std::string" + paren_expr;
+      } else if (context_type == VariableType::String && paren_result_type == VariableType::Boolean) {
+        return "(" + paren_expr + std::string(kBoolToStringTernary) + ")";
       }
       return paren_expr;
     }
@@ -473,6 +519,13 @@ bool FileMaker::MakeVariableDeclaration(const Command &command) {
         history_.insert(Command::CommandType::VariableDeclaration);
       }
     }
+  } else if (var_type == VariableType::Boolean) {
+    std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::Boolean);
+    if (already_declared) {
+      InsertCode(command.variable_name + " = " + expr_code + ";", tab);
+    } else {
+      InsertCode("bool " + command.variable_name + " = " + expr_code + ";", tab);
+    }
   } else {
     std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::Numeric);
     if (already_declared) {
@@ -502,6 +555,9 @@ bool FileMaker::MakeVariableAssignment(const Command &command) {
     } else {
       InsertCode(command.variable_name + " = " + expr_code + ";", tab);
     }
+  } else if (var_type == VariableType::Boolean) {
+    std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::Boolean);
+    InsertCode(command.variable_name + " = " + expr_code + ";", tab);
   } else {
     std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::Numeric);
     InsertCode(command.variable_name + " " + command.compound_op + " " + expr_code + ";", tab);

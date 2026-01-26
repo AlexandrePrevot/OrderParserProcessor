@@ -1,0 +1,54 @@
+myTrue = True
+myFalse = False
+
+Print("Boolean literals:")
+Print("  myTrue = " + myTrue)
+Print("  myFalse = " + myFalse)
+
+myOrVar = myTrue or myFalse
+myAndVar = myTrue and myFalse
+
+Print("Logical operators:")
+Print("  True or False = " + myOrVar)
+Print("  True and False = " + myAndVar)
+
+comparison1 = 3 > 4
+comparison2 = 5 <= 10
+comparison3 = 7 == 7
+comparison4 = 8 != 9
+comparison5 = 111389 <= 111389
+
+Print("Comparison operators:")
+Print("  3 > 4 = " + comparison1)
+Print("  5 <= 10 = " + comparison2)
+Print("  7 == 7 = " + comparison3)
+Print("  8 != 9 = " + comparison4)
+Print("  111389 <= 111389 = " + comparison5)
+
+x = 10
+y = 20
+isGreater = x > y
+isEqual = x == y
+
+Print("Variable comparisons:")
+Print("  x = " + x)
+Print("  y = " + y)
+Print("  (x > y) = " + (x > y))
+Print("  x == y = " + isEqual)
+
+complexBoolean = (3 > 2) and (5 < 10)
+Print("Complex boolean: (3 > 2) and (5 < 10) = " + complexBoolean)
+
+to_compare_with = 101
+anotherTrue = myFalse or myTrue and (101 != (102 - 1))
+very_very_complex_true = comparison5 and (True == (comparison2))
+very_very_complex_false = (to_compare_with > 20) and very_very_complex_true == false
+
+Print("Very complex booleans")
+Print("myFalse or myTrue and (101 != (102 - 1)) = " + (myFalse or myTrue and (101 != (102 - 1))))
+Print("comparison5 = " + comparison5)
+Print("comparison2 = " + comparison2)
+Print("very_very_complex_true = comparison5 and (True == (comparison2))")
+Print("very_very_complex_true result is  " + very_very_complex_true)
+Print("to_compare_with = " + to_compare_with)
+Print("(to_compare_with > 20) and very_very_complex_true == false = " + very_very_complex_false)

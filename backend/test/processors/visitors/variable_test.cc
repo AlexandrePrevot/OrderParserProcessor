@@ -194,3 +194,94 @@ TEST(VariableExpressionTest, RedeclarationWithoutType) {
   EXPECT_NE(first_include, std::string::npos);
   EXPECT_EQ(second_include, std::string::npos);
 }
+
+TEST(BooleanExpressionTest, BooleanLiterals) {
+  ConcreteFiScriptVisitor visitor;
+  EXPECT_TRUE(visitor.Compile(
+    "myTrue = True\n"
+    "myFalse = False\n"
+  ));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(2, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+  std::string code = maker.GetCode();
+  EXPECT_NE(code.find("bool myTrue = true"), std::string::npos);
+  EXPECT_NE(code.find("bool myFalse = false"), std::string::npos);
+}
+
+TEST(BooleanExpressionTest, LogicalOperators) {
+  ConcreteFiScriptVisitor visitor;
+  EXPECT_TRUE(visitor.Compile(
+    "myTrue = True\n"
+    "myFalse = False\n"
+    "myOrVar = myTrue or myFalse\n"
+    "myAndVar = myTrue and myFalse\n"
+  ));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(4, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+  std::string code = maker.GetCode();
+  EXPECT_NE(code.find("bool myOrVar = myTrue || myFalse"), std::string::npos);
+  EXPECT_NE(code.find("bool myAndVar = myTrue && myFalse"), std::string::npos);
+}
+
+TEST(BooleanExpressionTest, ComparisonOperators) {
+  ConcreteFiScriptVisitor visitor;
+  EXPECT_TRUE(visitor.Compile(
+    "result1 = 3 > 4\n"
+    "result2 = 5 <= 10\n"
+    "result3 = 7 == 7\n"
+    "result4 = 8 != 9\n"
+  ));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(4, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+  std::string code = maker.GetCode();
+  EXPECT_NE(code.find("bool result1 = 3 > 4"), std::string::npos);
+  EXPECT_NE(code.find("bool result2 = 5 <= 10"), std::string::npos);
+  EXPECT_NE(code.find("bool result3 = 7 == 7"), std::string::npos);
+  EXPECT_NE(code.find("bool result4 = 8 != 9"), std::string::npos);
+}
+
+TEST(BooleanExpressionTest, BooleanInPrint) {
+  ConcreteFiScriptVisitor visitor;
+  EXPECT_TRUE(visitor.Compile(
+    "myTrue = True\n"
+    "Print(\"myTrue is \" + myTrue)\n"
+  ));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(2, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+  std::string code = maker.GetCode();
+  EXPECT_NE(code.find("bool myTrue"), std::string::npos);
+  EXPECT_NE(code.find("myTrue ? \"True\" : \"False\""), std::string::npos);
+}
+
+TEST(BooleanExpressionTest, ComparisonInPrint) {
+  ConcreteFiScriptVisitor visitor;
+  EXPECT_TRUE(visitor.Compile(
+    "myVar = 3 > 4\n"
+    "Print(\"3 > 4 is \" + myVar)\n"
+  ));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(2, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+  std::string code = maker.GetCode();
+  EXPECT_NE(code.find("bool myVar = 3 > 4"), std::string::npos);
+  EXPECT_NE(code.find("myVar ? \"True\" : \"False\""), std::string::npos);
+}
