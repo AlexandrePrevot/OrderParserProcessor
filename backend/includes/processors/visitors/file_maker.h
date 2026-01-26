@@ -21,12 +21,13 @@ public:
 private:
   bool AddCommand(const Command &command);
   bool MakeLine(const Command &command);
-  void MakeBlock(const Command &command);
+  void MakeBlock(const std::vector<Command> &commands);
   void BuildOutput();
 
   bool MakeScheduleCommand(const Command &command);
   bool MakePrintCommand(const Command &command);
   bool MakeReactOnCommand(const Command &command);
+  bool MakeIfCommand(const Command &command);
   bool MakeVariableDeclaration(const Command &command);
   bool MakeVariableAssignment(const Command &command);
 
@@ -38,6 +39,7 @@ private:
 
   void Include(const Command &command);
   void CollectRequiredManagers(const Command &command);
+  void ProcessCommandsForManagers(const std::vector<Command> &commands);
   std::string GenerateLambdaCaptures() const;
 
   inline void InsertCode(const std::string &code, long tab) {

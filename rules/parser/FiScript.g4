@@ -6,6 +6,7 @@ statement
     : schedule
     | reacton
     | print
+    | if
     | variableDeclaration
     | variableAssignment
     ;
@@ -13,6 +14,7 @@ statement
 schedule   : SCHEDULE argumentList block NEWLINE* ;
 reacton   : REACTON argumentList block NEWLINE* ;
 print   : PRINT '(' expression ')' NEWLINE* ;
+if   : 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* ('else' block)? NEWLINE* ;
 
 variableDeclaration : IDENTIFIER '=' expression NEWLINE ;
 variableAssignment : IDENTIFIER COMPOUND_OP expression NEWLINE ;
@@ -29,6 +31,9 @@ expression
     | STRING_LITERAL                              # StringLiteral
     ;
 
+// Block rule: newlines are optional inside {} blocks.
+// but not possible to add newlines before {
+// known and intended yet (can be changed in the future)
 block
     : '{' NEWLINE* statement* NEWLINE* '}'
     ;

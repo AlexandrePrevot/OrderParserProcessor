@@ -8,6 +8,7 @@ add_executable(
   processors/visitors/file_maker_test.cc
   processors/visitors/variable_test.cc
   processors/visitors/nested_commands_test.cc
+  processors/visitors/if_statement_test.cc
 )
 
 target_include_directories(processors_test PUBLIC ${CMAKE_SOURCE_DIR}/backend/includes/)
