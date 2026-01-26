@@ -43,6 +43,7 @@ ConcreteFiScriptVisitor::visitStatement(FiScriptParser::StatementContext *ctx) {
   FiScriptParser::ReactonContext *reacton = ctx->reacton();
   FiScriptParser::ScheduleContext *schedule = ctx->schedule();
   FiScriptParser::PrintContext *print = ctx->print();
+  FiScriptParser::IfContext *ifStmt = ctx->if_();
   FiScriptParser::VariableDeclarationContext *varDecl = ctx->variableDeclaration();
   FiScriptParser::VariableAssignmentContext *varAssign = ctx->variableAssignment();
 
@@ -52,6 +53,8 @@ ConcreteFiScriptVisitor::visitStatement(FiScriptParser::StatementContext *ctx) {
     return visitSchedule(schedule);
   } else if (print != nullptr) {
     return visitPrint(print);
+  } else if (ifStmt != nullptr) {
+    return visitIf(ifStmt);
   } else if (varDecl != nullptr) {
     return visitVariableDeclaration(varDecl);
   } else if (varAssign != nullptr) {
@@ -96,6 +99,43 @@ ConcreteFiScriptVisitor::visitPrint(FiScriptParser::PrintContext *ctx) {
 
   auto expr_result = visitExpression(ctx->expression());
   command.expression = std::any_cast<std::shared_ptr<ExprNode>>(expr_result);
+
+  return command;
+}
+
+std::any
+ConcreteFiScriptVisitor::visitIf(FiScriptParser::IfContext *ctx) {
+  Command command;
+  command.type = Command::CommandType::If;
+
+  auto expr_result = visitExpression(ctx->expression(0));
+  command.expression = std::any_cast<std::shared_ptr<ExprNode>>(expr_result);
+
+  for (const auto &statement : ctx->block(0)->statement()) {
+    command.in_scope.push_back(
+        std::any_cast<Command>(visitStatement(statement)));
+  }
+
+  size_t num_else_ifs = ctx->expression().size() - 1;
+  for (size_t i = 0; i < num_else_ifs; ++i) {
+    auto else_if_expr = visitExpression(ctx->expression(i + 1));
+    auto else_if_expr_node = std::any_cast<std::shared_ptr<ExprNode>>(else_if_expr);
+
+    std::vector<Command> else_if_block;
+    for (const auto &statement : ctx->block(i + 1)->statement()) {
+      else_if_block.push_back(std::any_cast<Command>(visitStatement(statement)));
+    }
+
+    command.else_if_branches.push_back({else_if_expr_node, else_if_block});
+  }
+
+  size_t total_blocks = ctx->block().size();
+  size_t expected_blocks = 1 + num_else_ifs;
+  if (total_blocks > expected_blocks) {
+    for (const auto &statement : ctx->block(total_blocks - 1)->statement()) {
+      command.else_block.push_back(std::any_cast<Command>(visitStatement(statement)));
+    }
+  }
 
   return command;
 }

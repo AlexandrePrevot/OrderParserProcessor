@@ -6,6 +6,7 @@ statement
     : schedule
     | reacton
     | print
+    | if
     | variableDeclaration
     | variableAssignment
     ;
@@ -13,6 +14,7 @@ statement
 schedule   : SCHEDULE argumentList block NEWLINE* ;
 reacton   : REACTON argumentList block NEWLINE* ;
 print   : PRINT '(' expression ')' NEWLINE* ;
+if   : 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* ('else' block)? NEWLINE* ;
 
 variableDeclaration : IDENTIFIER '=' expression NEWLINE ;
 variableAssignment : IDENTIFIER COMPOUND_OP expression NEWLINE ;

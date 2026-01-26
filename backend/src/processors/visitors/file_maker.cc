@@ -126,6 +126,8 @@ bool FileMaker::MakeLine(const Command &command) {
     return MakePrintCommand(command);
   case Type::ReactOn:
     return MakeReactOnCommand(command);
+  case Type::If:
+    return MakeIfCommand(command);
   case Type::VariableDeclaration:
     return MakeVariableDeclaration(command);
   case Type::VariableAssignment:
@@ -136,10 +138,10 @@ bool FileMaker::MakeLine(const Command &command) {
   return false;
 }
 
-void FileMaker::MakeBlock(const Command &command) {
+void FileMaker::MakeBlock(const std::vector<Command> &commands) {
   auto prev_variable_types = variable_types_;
   tab_to_add_++;
-  for (const auto &sub_command : command.in_scope) {
+  for (const auto &sub_command : commands) {
     MakeLine(sub_command);
   }
   tab_to_add_--;
@@ -250,7 +252,7 @@ bool FileMaker::MakeScheduleCommand(const Command &command) {
 
   InsertCode("timer_manager.CreateTimer(" + lambda_captures + "() mutable {", tab);
 
-  MakeBlock(command);
+  MakeBlock(command.in_scope);
 
   InsertCode(std::string("}, std::chrono::seconds(") +
                  std::to_string(seconds_to_wait) + "), " +
@@ -331,9 +333,42 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
                  ", " + std::to_string(repeat) + ", " + lambda_captures + "() mutable {",
              tab);
 
-  MakeBlock(command);
+  MakeBlock(command.in_scope);
 
   InsertCode("});", tab);
+
+  return true;
+}
+
+bool FileMaker::MakeIfCommand(const Command &command) {
+  if (!command.expression) {
+    std::cout << "If command missing expression" << std::endl;
+    return false;
+  }
+
+  std::cout << "adding the if command" << std::endl;
+
+  long tab = code_it_->first;
+
+  std::string condition = GenerateExpressionCode(command.expression.get(), VariableType::Boolean);
+  InsertCode("if (" + condition + ") {", tab);
+
+  MakeBlock(command.in_scope);
+
+  for (const auto &else_if_branch : command.else_if_branches) {
+    std::string else_if_condition = GenerateExpressionCode(else_if_branch.first.get(), VariableType::Boolean);
+    InsertCode("} else if (" + else_if_condition + ") {", tab);
+
+    MakeBlock(else_if_branch.second);
+  }
+
+  if (!command.else_block.empty()) {
+    InsertCode("} else {", tab);
+
+    MakeBlock(command.else_block);
+  }
+
+  InsertCode("}", tab);
 
   return true;
 }
