@@ -39,6 +39,7 @@ private:
 
   void Include(const Command &command);
   void CollectRequiredManagers(const Command &command);
+  void ProcessCommandsForManagers(const std::vector<Command> &commands);
   std::string GenerateLambdaCaptures() const;
 
   inline void InsertCode(const std::string &code, long tab) {

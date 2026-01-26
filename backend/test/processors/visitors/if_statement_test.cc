@@ -442,3 +442,107 @@ TEST(IfStatementTest, VariableScoping) {
   size_t second_y = generated.find("double y = 30");
   EXPECT_NE(second_y, std::string::npos);
 }
+
+TEST(IfStatementTest, ScheduleInsideElseIfBlock) {
+  ConcreteFiScriptVisitor visitor;
+
+  std::string code =
+    "x = 7\n"
+    "if (x > 10) {\n"
+    "    Print(\"x > 10\")\n"
+    "} else if (x > 5) {\n"
+    "    Schedule(Start, 2s, 1) {\n"
+    "        Print(\"Schedule in else if\")\n"
+    "    }\n"
+    "}\n";
+
+  EXPECT_TRUE(visitor.Compile(code));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(2, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+
+  std::string generated = maker.GetCode();
+  std::cout << "Generated code for Schedule inside else if:\n" << generated << std::endl;
+
+  EXPECT_NE(generated.find("if (x > 10) {"), std::string::npos);
+  EXPECT_NE(generated.find("} else if (x > 5) {"), std::string::npos);
+  EXPECT_NE(generated.find("timer_manager.CreateTimer([=, &timer_manager]()"), std::string::npos);
+  EXPECT_NE(generated.find("TimerManager timer_manager"), std::string::npos);
+}
+
+TEST(IfStatementTest, ReactOnInsideElseBlock) {
+  ConcreteFiScriptVisitor visitor;
+
+  std::string code =
+    "x = 3\n"
+    "if (x > 10) {\n"
+    "    Print(\"x > 10\")\n"
+    "} else {\n"
+    "    ReactOn(\"MSFT\", 2) {\n"
+    "        Print(\"ReactOn in else\")\n"
+    "    }\n"
+    "}\n";
+
+  EXPECT_TRUE(visitor.Compile(code));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(2, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+
+  std::string generated = maker.GetCode();
+  std::cout << "Generated code for ReactOn inside else:\n" << generated << std::endl;
+
+  EXPECT_NE(generated.find("if (x > 10) {"), std::string::npos);
+  EXPECT_NE(generated.find("} else {"), std::string::npos);
+  EXPECT_NE(generated.find("reacton_service.RegisterReaction(\"MSFT\", 2, [=, &reacton_service]()"), std::string::npos);
+  EXPECT_NE(generated.find("ReactOnService reacton_service"), std::string::npos);
+}
+
+TEST(IfStatementTest, ComplexManagersInAllIfBranches) {
+  ConcreteFiScriptVisitor visitor;
+
+  std::string code =
+    "x = 7\n"
+    "if (x > 15) {\n"
+    "    Schedule(Start, 1s, 1) {\n"
+    "        Print(\"Schedule in if\")\n"
+    "    }\n"
+    "} else if (x > 10) {\n"
+    "    ReactOn(\"AAPL\", 3) {\n"
+    "        Print(\"ReactOn in else if\")\n"
+    "    }\n"
+    "} else if (x > 5) {\n"
+    "    Schedule(Start, 2s, 2) {\n"
+    "        Print(\"Schedule in second else if\")\n"
+    "    }\n"
+    "} else {\n"
+    "    ReactOn(\"MSFT\", 5) {\n"
+    "        Print(\"ReactOn in else\")\n"
+    "    }\n"
+    "}\n";
+
+  EXPECT_TRUE(visitor.Compile(code));
+
+  const auto &commands = visitor.get_commands_list();
+  ASSERT_EQ(2, commands.size());
+
+  FileMaker maker(commands);
+  EXPECT_TRUE(maker.Compiled());
+
+  std::string generated = maker.GetCode();
+  std::cout << "Generated code for complex managers in all if branches:\n" << generated << std::endl;
+
+  EXPECT_NE(generated.find("TimerManager timer_manager"), std::string::npos);
+  EXPECT_NE(generated.find("ReactOnService reacton_service"), std::string::npos);
+  EXPECT_NE(generated.find("if (x > 15) {"), std::string::npos);
+  EXPECT_NE(generated.find("} else if (x > 10) {"), std::string::npos);
+  EXPECT_NE(generated.find("} else if (x > 5) {"), std::string::npos);
+  EXPECT_NE(generated.find("} else {"), std::string::npos);
+  EXPECT_NE(generated.find("timer_manager.CreateTimer([=, &timer_manager, &reacton_service]()"), std::string::npos);
+  EXPECT_NE(generated.find("reacton_service.RegisterReaction"), std::string::npos);
+}

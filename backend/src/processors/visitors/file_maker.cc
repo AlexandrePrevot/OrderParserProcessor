@@ -350,6 +350,8 @@ bool FileMaker::MakeIfCommand(const Command &command) {
 
   long tab = code_it_->first;
 
+  CollectRequiredManagers(command);
+
   std::string condition = GenerateExpressionCode(command.expression.get(), VariableType::Boolean);
   InsertCode("if (" + condition + ") {", tab);
 
@@ -654,14 +656,10 @@ void FileMaker::Include(const Command &command) {
   history_.insert(command.type);
 }
 
-// to avoid defining managers to soon (which take multiple threads)
-// it is better to recursively check the subcommand
-// to know if they are using the manager/service (such as Timer or ReactOn)
-// then create them in the code
-void FileMaker::CollectRequiredManagers(const Command &command) {
+void FileMaker::ProcessCommandsForManagers(const std::vector<Command> &commands) {
   using Type = Command::CommandType;
 
-  for (const auto &sub_command : command.in_scope) {
+  for (const auto &sub_command : commands) {
     if (sub_command.type == Type::Schedule) {
       active_managers_.insert(Type::Schedule);
       AddTimerManager(sub_command);
@@ -671,6 +669,20 @@ void FileMaker::CollectRequiredManagers(const Command &command) {
     }
     CollectRequiredManagers(sub_command);
   }
+}
+
+// to avoid defining managers to soon (which take multiple threads)
+// it is better to recursively check the subcommand
+// to know if they are using the manager/service (such as Timer or ReactOn)
+// then create them in the code
+void FileMaker::CollectRequiredManagers(const Command &command) {
+  ProcessCommandsForManagers(command.in_scope);
+
+  for (const auto &else_if_branch : command.else_if_branches) {
+    ProcessCommandsForManagers(else_if_branch.second);
+  }
+
+  ProcessCommandsForManagers(command.else_block);
 }
 
 std::string FileMaker::GenerateLambdaCaptures() const {
