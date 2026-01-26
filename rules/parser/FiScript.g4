@@ -31,6 +31,9 @@ expression
     | STRING_LITERAL                              # StringLiteral
     ;
 
+// Block rule: newlines are optional inside {} blocks.
+// but not possible to add newlines before {
+// known and intended yet (can be changed in the future)
 block
     : '{' NEWLINE* statement* NEWLINE* '}'
     ;
