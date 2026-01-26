@@ -136,6 +136,16 @@ bool FileMaker::MakeLine(const Command &command) {
   return false;
 }
 
+void FileMaker::MakeBlock(const Command &command) {
+  auto prev_variable_types = variable_types_;
+  tab_to_add_++;
+  for (const auto &sub_command : command.in_scope) {
+    MakeLine(sub_command);
+  }
+  tab_to_add_--;
+  variable_types_ = std::move(prev_variable_types);
+}
+
 void FileMaker::BuildOutput() {
   std::ostringstream oss;
 
@@ -240,11 +250,8 @@ bool FileMaker::MakeScheduleCommand(const Command &command) {
 
   InsertCode("timer_manager.CreateTimer(" + lambda_captures + "() mutable {", tab);
 
-  tab_to_add_++;
-  for (const auto &sub_command : command.in_scope) {
-    MakeLine(sub_command);
-  }
-  tab_to_add_--;
+  MakeBlock(command);
+
   InsertCode(std::string("}, std::chrono::seconds(") +
                  std::to_string(seconds_to_wait) + "), " +
                  std::to_string(repeat) + ");",
@@ -323,11 +330,9 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
   InsertCode(std::string("reacton_service.RegisterReaction(") + instrument_id +
                  ", " + std::to_string(repeat) + ", " + lambda_captures + "() mutable {",
              tab);
-  tab_to_add_++;
-  for (const auto &sub_command : command.in_scope) {
-    MakeLine(sub_command);
-  }
-  tab_to_add_--;
+
+  MakeBlock(command);
+
   InsertCode("});", tab);
 
   return true;

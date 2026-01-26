@@ -21,6 +21,7 @@ public:
 private:
   bool AddCommand(const Command &command);
   bool MakeLine(const Command &command);
+  void MakeBlock(const Command &command);
   void BuildOutput();
 
   bool MakeScheduleCommand(const Command &command);
