@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-enum class VariableType { Numeric, String };
+enum class VariableType { Numeric, String, Boolean };
 
 struct ExprNode {
   enum class Type { Literal, VariableRef, BinaryOp, Paren };
@@ -16,8 +16,10 @@ struct ExprNode {
 struct LiteralNode : ExprNode {
   std::string value;
   bool is_string;
+  bool is_boolean;
 
-  LiteralNode(const std::string& val, bool str) : value(val), is_string(str) {
+  LiteralNode(const std::string& val, bool str, bool boolean = false)
+      : value(val), is_string(str), is_boolean(boolean) {
     node_type = Type::Literal;
   }
 };

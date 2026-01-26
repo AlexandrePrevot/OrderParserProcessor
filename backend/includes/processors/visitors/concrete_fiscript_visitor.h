@@ -43,9 +43,12 @@ private:
   virtual std::any visitParenExpression(FiScriptParser::ParenExpressionContext *context);
   virtual std::any visitMulDiv(FiScriptParser::MulDivContext *context);
   virtual std::any visitAddSub(FiScriptParser::AddSubContext *context);
+  virtual std::any visitComparison(FiScriptParser::ComparisonContext *context);
+  virtual std::any visitLogicalOp(FiScriptParser::LogicalOpContext *context);
   virtual std::any visitVariableRef(FiScriptParser::VariableRefContext *context);
   virtual std::any visitNumericLiteral(FiScriptParser::NumericLiteralContext *context);
   virtual std::any visitStringLiteral(FiScriptParser::StringLiteralContext *context);
+  virtual std::any visitBooleanLiteral(FiScriptParser::BooleanLiteralContext *context);
 
   std::vector<Command> commands_list_;
   std::map<std::string, VariableType> variable_types_;

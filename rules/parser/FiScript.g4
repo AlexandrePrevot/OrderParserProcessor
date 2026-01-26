@@ -21,6 +21,9 @@ expression
     : '(' expression ')'                          # ParenExpression
     | expression ('*' | '/') expression           # MulDiv
     | expression ('+' | '-') expression           # AddSub
+    | expression ('>' | '<' | '>=' | '<=' | '==' | '!=') expression # Comparison
+    | expression ('and' | 'or') expression        # LogicalOp
+    | BOOL_LITERAL                                # BooleanLiteral
     | IDENTIFIER                                  # VariableRef
     | NUMBER                                      # NumericLiteral
     | STRING_LITERAL                              # StringLiteral
@@ -43,6 +46,7 @@ fragment DIGIT : [0-9] ;
 SCHEDULE : 'Schedule' ;
 REACTON : 'ReactOn' ;
 PRINT : 'Print' ;
+BOOL_LITERAL : 'True' | 'False' ;
 COMPOUND_OP : '+=' | '-=' | '*=' | '/=' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
 ARGUMENT_TOKEN : DIGIT+ [a-zA-Z_] [a-zA-Z0-9_]* ;
