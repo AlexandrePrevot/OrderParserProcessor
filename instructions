@@ -34,20 +34,17 @@ where to get the data
 https://www.kaggle.com/datasets/borismarjanovic/daily-and-intraday-stock-price-data?
 the idea is to make a python file to parse it, and a matching engine to receive it
 
+use python with
 
-goal thursday :
+// generate the proto files first as above
 
-create table script with 
-- ScriptID primary key
-- Code required
-- Title required
-- CreationDate required
-- Author required
-- Active required
-- ActivationDate optional
-- Summary optional
-- LastModifDate optional
+python3 -m venv venv
+source venv/bin/activate
+pip install --no-cache-dir -r OrderParserProcessor/backend-api/requirements.txt
+fastapi dev OrderParserProcessor/backend-api/main.py --host 0.0.0.0
 
 
-python dockerized + connected to DB
-+ can save to DB
+
+to run javascript frontend
+cd OrderParserProcessor/frontend
+npm run dev
