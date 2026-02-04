@@ -124,6 +124,8 @@ bool FileMaker::MakeLine(const Command &command) {
     return MakeScheduleCommand(command);
   case Type::Print:
     return MakePrintCommand(command);
+  case Type::Alert:
+    return MakeAlertCommand(command);
   case Type::ReactOn:
     return MakeReactOnCommand(command);
   case Type::If:
@@ -276,6 +278,26 @@ bool FileMaker::MakePrintCommand(const Command &command) {
 
   std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
   InsertCode(std::string("std::cout << (") + expr_code + std::string(") << std::endl;"),
+             tab);
+
+  return true;
+}
+
+bool FileMaker::MakeAlertCommand(const Command &command) {
+  if (!command.expression) {
+    std::cout << "Alert command missing expression" << std::endl;
+    return false;
+  }
+
+  std::cout << "adding the alert command" << std::endl;
+
+  long tab = code_it_->first;
+  
+  AddAlertService(command);
+
+
+  std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
+  InsertCode(std::string("script_alert_service.SendAlert(\"User\", ") + expr_code + ");",
              tab);
 
   return true;
@@ -608,6 +630,17 @@ bool FileMaker::MakeVariableAssignment(const Command &command) {
   return true;
 }
 
+void FileMaker::AddAlertService(const Command &command) {
+  const bool added_before =
+      history_.find(Command::CommandType::Alert) != std::cend(history_);
+  const long tab = code_it_->first;
+  Include(command);
+
+  if (!added_before) {
+    InsertCode("ScriptAlertService script_alert_service;", tab);
+  }
+}
+
 void FileMaker::AddTimerManager(const Command &command) {
   const bool added_before =
       history_.find(Command::CommandType::Schedule) != std::cend(history_);
@@ -646,6 +679,9 @@ void FileMaker::Include(const Command &command) {
   case Type::Print:
     InsertInclude("<iostream>", false);
     break;
+  case Type::Alert:
+    InsertInclude("\"services/script_alert_service.h\"", true);
+    break;
   case Type::ReactOn:
     InsertInclude("\"services/reacton_service.h\"", true);
     break;
@@ -666,6 +702,9 @@ void FileMaker::ProcessCommandsForManagers(const std::vector<Command> &commands)
     } else if (sub_command.type == Type::ReactOn) {
       active_managers_.insert(Type::ReactOn);
       AddReactOnService(sub_command);
+    } else if (sub_command.type == Type::Alert) {
+      active_managers_.insert(Type::Alert);
+      AddAlertService(sub_command);
     }
     CollectRequiredManagers(sub_command);
   }
@@ -696,6 +735,11 @@ std::string FileMaker::GenerateLambdaCaptures() const {
   if (active_managers_.find(Command::CommandType::ReactOn) != active_managers_.end() &&
       history_.find(Command::CommandType::ReactOn) != history_.end()) {
     captures += ", &reacton_service";
+  }
+
+  if (active_managers_.find(Command::CommandType::Alert) != active_managers_.end() &&
+      history_.find(Command::CommandType::Alert) != history_.end()) {
+    captures += ", &script_alert_service";
   }
 
   captures += "]";

@@ -43,11 +43,14 @@ ConcreteFiScriptVisitor::visitStatement(FiScriptParser::StatementContext *ctx) {
   FiScriptParser::ReactonContext *reacton = ctx->reacton();
   FiScriptParser::ScheduleContext *schedule = ctx->schedule();
   FiScriptParser::PrintContext *print = ctx->print();
+  FiScriptParser::AlertContext *alert = ctx->alert();
   FiScriptParser::IfContext *ifStmt = ctx->if_();
   FiScriptParser::VariableDeclarationContext *varDecl = ctx->variableDeclaration();
   FiScriptParser::VariableAssignmentContext *varAssign = ctx->variableAssignment();
 
-  if (reacton != nullptr) {
+  if (alert != nullptr) {
+    return visitAlert(alert);
+  } else if (reacton != nullptr) {
     return visitReacton(reacton);
   } else if (schedule != nullptr) {
     return visitSchedule(schedule);
@@ -100,6 +103,16 @@ ConcreteFiScriptVisitor::visitPrint(FiScriptParser::PrintContext *ctx) {
   auto expr_result = visitExpression(ctx->expression());
   command.expression = std::any_cast<std::shared_ptr<ExprNode>>(expr_result);
 
+  return command;
+}
+
+std::any
+ConcreteFiScriptVisitor::visitAlert(FiScriptParser::AlertContext *ctx) {
+  Command command;
+  command.type = Command::CommandType::Alert;
+
+  auto expr_result = visitExpression(ctx->expression());
+  command.expression = std::any_cast<std::shared_ptr<ExprNode>>(expr_result);
   return command;
 }
 

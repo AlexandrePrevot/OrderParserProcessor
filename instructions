@@ -48,3 +48,14 @@ fastapi dev OrderParserProcessor/backend-api/main.py --host 0.0.0.0
 to run javascript frontend
 cd OrderParserProcessor/frontend
 npm run dev
+
+
+tech debt:
+- support multiple user sessions (currently only one websocket queue)
+- make sure the grpc server in backend-api is stopped cleanly on shutdown
+- support multiple feeds for connectivity to market data providers
+- support multiple scripts at the same time
+- support multiple instrument for reacton
+- insert data in the db (have a real active db instead of in memory only)
+- improve error handling everywhere
+- start measuring performance and optimize bottlenecks

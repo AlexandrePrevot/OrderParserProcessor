@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <functional>
@@ -71,7 +72,6 @@ private:
 
   void inline PushTaskPtr(const TaskPtr& task) {
     tasks_to_do_.push(task);
-    active_timer_count_++;
     timer_count_++;
   }
 
@@ -80,7 +80,6 @@ private:
       return;
 
     tasks_to_do_.pop();
-    active_timer_count_--;
   }
 
   bool stop_;
@@ -89,7 +88,7 @@ private:
   std::condition_variable cond_var_;
   std::condition_variable wait_cond_var_;
 
-  unsigned long long active_timer_count_;
+  std::atomic<unsigned long long> active_timer_count_;
   unsigned long long timer_count_;
   unsigned long long timer_limit_;
 };
