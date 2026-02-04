@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Scripts from "./scripts/Scripts"
 import MarketData from "./market-data/MarketData"
@@ -6,6 +7,24 @@ import SideBar from "./SideBar";
 import NotFound from "./NotFound";
 
 function MainLayout() {
+    useEffect(() => {
+        const ws = new WebSocket("ws://localhost:8000/ws");
+
+        ws.onmessage = (event) => {
+            alert(event.data);
+        };
+
+        ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        ws.onclose = () => {
+            console.log("WebSocket connection closed");
+        };
+
+        return () => ws.close();
+    }, []);
+
     return (
         <BrowserRouter>
             <div className ="flex">
