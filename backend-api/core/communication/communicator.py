@@ -1,7 +1,9 @@
 import grpc
+from google.protobuf import empty_pb2
 
 import services.api_to_core_pb2_grpc
-import services.api_to_core_pb2
+import services.script_to_api_pb2_grpc
+
 import messages.script_submit_pb2
 
 
@@ -27,3 +29,78 @@ class ApiToCoreHandler:
             print("Script submission failed : " + str(err))
 
         print("communication finished")
+
+
+class ScriptToApiServicer(services.script_to_api_pb2_grpc.ScriptToApiServicer):
+    """gRPC servicer to receive notifications from scripts"""
+
+    def __init__(self, notif_callback):
+        self.notif_callback = notif_callback
+
+    async def ScriptAlert(self, request, context):
+        print("Received ScriptAlert:")
+        print(f"Script Title: {request.script_title}")
+        print(f"User: {request.user}")
+        print(f"Message: {request.message}")
+
+        await self.notif_callback(request)
+
+        return empty_pb2.Empty()
+
+
+class ScriptToApiHandler:
+    """Handler to manage the gRPC server lifecycle"""
+
+    def __init__(self, notif_callback):
+        self.notif_callback = notif_callback
+        self.server = None
+
+    async def start(self):
+        """Start the gRPC server"""
+        self.server = grpc.aio.server()
+        services.script_to_api_pb2_grpc.add_ScriptToApiServicer_to_server(
+            ScriptToApiServicer(self.notif_callback), self.server)
+        self.server.add_insecure_port('[::]:50053')
+        await self.server.start()
+        print("gRPC ScriptToApi server started on port 50053")
+
+    async def wait_for_termination(self):
+        """Wait for server to terminate"""
+        if self.server:
+            await self.server.wait_for_termination()
+
+    async def stop(self):
+        """Stop the gRPC server gracefully"""
+        if self.server:
+            await self.server.stop(grace=5)
+            print("gRPC server stopped")
+
+
+class WebSocketManager:
+
+    def __init__(self):
+        self.active_connections = set()
+
+    async def connect(self, websocket):
+        await websocket.accept()
+        self.active_connections.add(websocket)
+        print(f"WebSocket connected: {websocket.client}")
+
+    def disconnect(self, websocket):
+        self.active_connections.discard(websocket)
+        print(f"WebSocket disconnected: {websocket.client}")
+
+    async def send_personal_message(self, message: str, websocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        """Send message to ALL connected clients"""
+        disconnected = set()
+        for connection in self.active_connections:
+            try:
+                await connection.send_text(message)
+            except Exception:
+                disconnected.add(connection)
+
+        for conn in disconnected:
+            self.active_connections.discard(conn)

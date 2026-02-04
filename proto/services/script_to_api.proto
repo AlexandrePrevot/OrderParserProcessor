@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package internal;
+
+import "google/protobuf/empty.proto";
+
+import "messages/script_alert_notif.proto";
+
+service ScriptToApi {
+    rpc ScriptAlert (ScriptAlertNotif) returns (google.protobuf.Empty);
+}
