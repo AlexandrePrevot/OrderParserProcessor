@@ -6,6 +6,7 @@ statement
     : schedule
     | reacton
     | print
+    | alert
     | if
     | variableDeclaration
     | variableAssignment
@@ -14,6 +15,7 @@ statement
 schedule   : SCHEDULE argumentList block NEWLINE* ;
 reacton   : REACTON argumentList block NEWLINE* ;
 print   : PRINT '(' expression ')' NEWLINE* ;
+alert   : ALERT '(' expression ')' NEWLINE* ;
 if   : 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* ('else' block)? NEWLINE* ;
 
 variableDeclaration : IDENTIFIER '=' expression NEWLINE ;
@@ -51,6 +53,7 @@ fragment DIGIT : [0-9] ;
 SCHEDULE : 'Schedule' ;
 REACTON : 'ReactOn' ;
 PRINT : 'Print' ;
+ALERT : 'Alert' ;
 BOOL_LITERAL : 'True' | 'False' ;
 COMPOUND_OP : '+=' | '-=' | '*=' | '/=' ;
 IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;

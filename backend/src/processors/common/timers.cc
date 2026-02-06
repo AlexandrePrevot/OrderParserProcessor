@@ -26,6 +26,7 @@ void TimerManager::CreateTimer(std::function<void()> task,
   std::unique_lock<std::mutex> lock(timer_mtx_);
 
   PushTask(std::chrono::steady_clock::now() + delay, delay, task, repeat_count);
+  active_timer_count_++;
   lock.unlock();
   cond_var_.notify_one();
 }
@@ -61,12 +62,15 @@ void TimerManager::Run() {
     const auto job = tasks_to_do_.top();
     PopTask();
 
+    bool repeated = false;
+
     // push the repeat before doing the job
     // because WaitTillFinished() can have spurious wake
     // during execution of a repeating job
     if (job->repeat == -1 || --job->repeat > 0) {
       job->time_to_run += job->interval;
       PushTaskPtr(job);
+      repeated = true;
     }
 
     // this is not correct
@@ -75,8 +79,11 @@ void TimerManager::Run() {
     // might take a few time before being done
     // should do it once the thread pool is done
     lock.unlock();
-    wait_cond_var_.notify_all();
     job->task();
+    wait_cond_var_.notify_all();
+    if (!repeated) {
+      active_timer_count_--;
+    }
     lock.lock();
   }
 }

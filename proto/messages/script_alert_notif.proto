@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package internal;
+
+import "google/protobuf/timestamp.proto";
+
+message ScriptAlertNotif {
+    string message = 1;
+    string script_title = 2;
+    string user = 3;
+    google.protobuf.Timestamp creation_time = 4;
+}
+

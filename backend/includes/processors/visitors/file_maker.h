@@ -26,6 +26,7 @@ private:
 
   bool MakeScheduleCommand(const Command &command);
   bool MakePrintCommand(const Command &command);
+  bool MakeAlertCommand(const Command &command);
   bool MakeReactOnCommand(const Command &command);
   bool MakeIfCommand(const Command &command);
   bool MakeVariableDeclaration(const Command &command);
@@ -33,6 +34,7 @@ private:
 
   void AddTimerManager(const Command &command);
   void AddReactOnService(const Command &command);
+  void AddAlertService(const Command &command);
 
   VariableType InferExpressionType(const ExprNode* expr) const;
   std::string GenerateExpressionCode(const ExprNode* expr, VariableType context_type) const;
