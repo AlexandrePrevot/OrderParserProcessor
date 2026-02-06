@@ -27,10 +27,9 @@ def index():
 @router.websocket('/ws')
 async def websocket_endpoint(websocket: WebSocket):
     await websocket_manager.connect(websocket)
-    await script_to_api_handler.start()  # Start the gRPC server to receive notifications
     try:
         while True:
-            # necessary when client disconnects, so that 
+            # necessary when client disconnects, so that
             # a task is not awaken when filling the queue
             # on a disconnected websocket, which would raise an error
             queue_task = asyncio.create_task(websocket_queue.get())

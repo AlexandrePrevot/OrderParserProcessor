@@ -292,7 +292,7 @@ bool FileMaker::MakeAlertCommand(const Command &command) {
   std::cout << "adding the alert command" << std::endl;
 
   long tab = code_it_->first;
-  
+
   AddAlertService(command);
 
 
