@@ -56,7 +56,7 @@ PRINT : 'Print' ;
 ALERT : 'Alert' ;
 BOOL_LITERAL : 'True' | 'False' ;
 COMPOUND_OP : '+=' | '-=' | '*=' | '/=' ;
-IDENTIFIER : [a-zA-Z_][a-zA-Z0-9_]* ;
+IDENTIFIER : [a-zA-Z_.][a-zA-Z0-9_.]* ;
 ARGUMENT_TOKEN : DIGIT+ [a-zA-Z_] [a-zA-Z0-9_]* ;
 NUMBER : DIGIT+ ('.' DIGIT+)? ;
 STRING_LITERAL : '"' (~['"\\] | '\\' .)* '"' ;

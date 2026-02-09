@@ -1,6 +1,5 @@
 #include "services/reacton_service.h"
 
-#include <iostream>
 #include <google/protobuf/empty.pb.h>
 
 ReactOnService::ReactOnService() : stop_(false) {
@@ -18,9 +17,9 @@ ReactOnService::~ReactOnService() {
   }
 }
 
-void ReactOnService::RegisterReaction(const std::string &instrument_id,
-                                       int max_count,
-                                       std::function<void()> callback) {
+void ReactOnService::RegisterReaction(
+    const std::string &instrument_id, int max_count,
+    std::function<void(const internal::PriceUpdate &quote)> callback) {
   reactions_.push_back(
       std::make_shared<Reaction>(instrument_id, max_count, callback));
 }
@@ -62,7 +61,11 @@ void ReactOnService::ReadMarketDataStream() {
         continue;
       }
 
-      reaction->callback();
+      // same problem as timers
+      // if the callback takes a long time to execute
+      // it can cause the stream to be blocked
+      // thread pool should be used to execute the callbacks
+      reaction->callback(update);
       reaction->current_count++;
     }
 
