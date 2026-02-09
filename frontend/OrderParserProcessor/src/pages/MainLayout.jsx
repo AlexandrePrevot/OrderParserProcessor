@@ -14,9 +14,12 @@ function MainLayout() {
         const ws = new WebSocket("ws://localhost:8000/ws");
 
         ws.onmessage = (event) => {
+            const obj = JSON.parse(event.data);
             const newNotification = {
                 id: Date.now(),
-                message: event.data,
+                message: obj.message,
+                user: obj.user,
+                script_title: obj.script_title,
                 timestamp: new Date(),
             };
             setNotifications(prev => [newNotification, ...prev]);

@@ -11,7 +11,8 @@ router = APIRouter()
 websocket_queue = asyncio.Queue()
 
 async def notif_callback(notification):
-    """Callback function to handle notifications from scripts or other sources"""
+    """ Callback function to handle notifications from scripts or other sources, 
+        expects a stringified JSON """
     await websocket_queue.put(notification)
 
 api_to_core_handler = ApiToCoreHandler()
@@ -54,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if queue_task in done:
                 notification = await queue_task
                 await websocket_manager.send_personal_message(
-                    str(notification),
+                    notification,
                     websocket
                 )
     except Exception as e:

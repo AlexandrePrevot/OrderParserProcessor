@@ -46,6 +46,9 @@ function NotificationItem({ notification, onRemove, isNew }) {
             <div className="text-xs text-gray-400 mb-1">
                 {formatTime(notification.timestamp)}
             </div>
+            <div className="text-xs text-blue-400 mb-1 font-semibold">
+                {notification.script_title}
+            </div>
             <div className="text-sm">
                 {notification.message}
             </div>
