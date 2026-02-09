@@ -20,7 +20,7 @@ TEST(IfStatementTest, SimpleIfStatement) {
   EXPECT_EQ(Command::CommandType::VariableDeclaration, commands[0].type);
   EXPECT_EQ(Command::CommandType::If, commands[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -50,7 +50,7 @@ TEST(IfStatementTest, IfWithElse) {
   ASSERT_EQ(2, commands.size());
   EXPECT_EQ(Command::CommandType::If, commands[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -79,7 +79,7 @@ TEST(IfStatementTest, IfWithElseIf) {
   ASSERT_EQ(2, commands.size());
   EXPECT_EQ(Command::CommandType::If, commands[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -110,7 +110,7 @@ TEST(IfStatementTest, IfWithMultipleElseIf) {
   ASSERT_EQ(2, commands.size());
   EXPECT_EQ(Command::CommandType::If, commands[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -142,7 +142,7 @@ TEST(IfStatementTest, CompleteIfElseIfElse) {
   ASSERT_EQ(2, commands.size());
   EXPECT_EQ(Command::CommandType::If, commands[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -169,7 +169,7 @@ TEST(IfStatementTest, IfWithBooleanVariable) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -194,7 +194,7 @@ TEST(IfStatementTest, IfWithLogicalOperators) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(3, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -219,7 +219,7 @@ TEST(IfStatementTest, IfWithEquality) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -247,7 +247,7 @@ TEST(IfStatementTest, NestedIfStatements) {
   ASSERT_EQ(1, commands[1].in_scope.size());
   EXPECT_EQ(Command::CommandType::If, commands[1].in_scope[0].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -277,7 +277,7 @@ TEST(IfStatementTest, IfInsideSchedule) {
   EXPECT_EQ(Command::CommandType::VariableDeclaration, commands[0].in_scope[0].type);
   EXPECT_EQ(Command::CommandType::If, commands[0].in_scope[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -307,7 +307,7 @@ TEST(IfStatementTest, ScheduleInsideIf) {
   ASSERT_EQ(1, commands[1].in_scope.size());
   EXPECT_EQ(Command::CommandType::Schedule, commands[1].in_scope[0].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -338,7 +338,7 @@ TEST(IfStatementTest, IfInsideReactOn) {
   ASSERT_EQ(2, commands[0].in_scope.size());
   EXPECT_EQ(Command::CommandType::If, commands[0].in_scope[1].type);
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -367,7 +367,7 @@ TEST(IfStatementTest, MultipleStatementsInIfBlock) {
   EXPECT_EQ(Command::CommandType::If, commands[1].type);
   ASSERT_EQ(3, commands[1].in_scope.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -399,7 +399,7 @@ TEST(IfStatementTest, ComplexNestedWithScheduleAndIf) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -430,7 +430,7 @@ TEST(IfStatementTest, VariableScoping) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(3, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -461,7 +461,7 @@ TEST(IfStatementTest, ScheduleInsideElseIfBlock) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -491,7 +491,7 @@ TEST(IfStatementTest, ReactOnInsideElseBlock) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -531,7 +531,7 @@ TEST(IfStatementTest, ComplexManagersInAllIfBranches) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
