@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const slideInKeyframes = `
 @keyframes slideIn {
@@ -14,15 +14,6 @@ const slideInKeyframes = `
 `;
 
 function NotificationItem({ notification, onRemove, isNew }) {
-    const [animate, setAnimate] = useState(isNew);
-
-    useEffect(() => {
-        if (isNew) {
-            const timer = setTimeout(() => setAnimate(false), 500);
-            return () => clearTimeout(timer);
-        }
-    }, [isNew]);
-
     const formatTime = (date) => {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
@@ -31,8 +22,8 @@ function NotificationItem({ notification, onRemove, isNew }) {
         <div
             className="p-3 rounded mb-2 relative"
             style={{
-                animation: animate ? 'slideIn 0.3s ease-out' : 'none',
-                backgroundColor: animate ? '#1e3a5f' : '#1f2937',
+                animation: isNew ? 'slideIn 0.3s ease-out' : 'none',
+                backgroundColor: isNew ? '#1e3a5f' : '#1f2937',
                 transition: 'background-color 0.5s ease',
             }}
         >
@@ -58,11 +49,25 @@ function NotificationItem({ notification, onRemove, isNew }) {
 
 function NotificationBar({ notifications = [], onRemove }) {
     const [expanded, setExpanded] = useState(false);
-    const [newestId, setNewestId] = useState(null);
+    const [newIds, setNewIds] = useState(new Set());
+    const prevIdsRef = useRef(new Set());
 
     useEffect(() => {
-        if (notifications.length > 0) {
-            setNewestId(notifications[0].id);
+        const currentIds = new Set(notifications.map(n => n.id));
+        const newlyAdded = new Set();
+
+        for (const id of currentIds) {
+            if (!prevIdsRef.current.has(id)) {
+                newlyAdded.add(id);
+            }
+        }
+
+        prevIdsRef.current = currentIds;
+
+        if (newlyAdded.size > 0) {
+            setNewIds(newlyAdded);
+            const timer = setTimeout(() => setNewIds(new Set()), 600);
+            return () => clearTimeout(timer);
         }
     }, [notifications]);
 
@@ -111,7 +116,7 @@ function NotificationBar({ notifications = [], onRemove }) {
                                     key={notification.id}
                                     notification={notification}
                                     onRemove={onRemove}
-                                    isNew={notification.id === newestId}
+                                    isNew={newIds.has(notification.id)}
                                 />
                             ))}
 
