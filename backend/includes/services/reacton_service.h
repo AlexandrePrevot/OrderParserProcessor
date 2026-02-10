@@ -15,9 +15,10 @@ struct Reaction {
   std::string instrument_id;
   int max_count;
   std::atomic<int> current_count;
-  std::function<void()> callback;
+  std::function<void(const internal::PriceUpdate &quote)> callback;
 
-  Reaction(const std::string &id, int max, std::function<void()> cb)
+  Reaction(const std::string &id, int max,
+           std::function<void(const internal::PriceUpdate &quote)> cb)
       : instrument_id(id), max_count(max), current_count(0), callback(cb) {}
 };
 
@@ -31,8 +32,9 @@ public:
   ReactOnService(ReactOnService &&) = delete;
   ReactOnService &operator=(ReactOnService &&) = delete;
 
-  void RegisterReaction(const std::string &instrument_id, int max_count,
-                        std::function<void()> callback);
+  void RegisterReaction(
+      const std::string &instrument_id, int max_count,
+      std::function<void(const internal::PriceUpdate &quote)> callback);
 
   void WaitForCompletion();
 

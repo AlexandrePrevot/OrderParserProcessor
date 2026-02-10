@@ -356,7 +356,8 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
   std::string lambda_captures = GenerateLambdaCaptures();
 
   InsertCode(std::string("reacton_service.RegisterReaction(") + instrument_id +
-                 ", " + std::to_string(repeat) + ", " + lambda_captures + "() mutable {",
+                 ", " + std::to_string(repeat) + ", " + lambda_captures +
+                 "(const internal::PriceUpdate &quote) mutable {",
              tab);
 
   MakeBlock(command.in_scope);
@@ -486,16 +487,25 @@ std::string FileMaker::GenerateExpressionCode(const ExprNode* expr, VariableType
 
     case ExprNode::Type::VariableRef: {
       const auto* var_ref = static_cast<const VariableRefNode*>(expr);
+      auto it = variable_types_.find(var_ref->var_name);
       if (context_type == VariableType::String) {
-        auto it = variable_types_.find(var_ref->var_name);
         if (it != variable_types_.end()) {
           if (it->second == VariableType::Numeric) {
             return "std::to_string(" + var_ref->var_name + ")";
           } else if (it->second == VariableType::Boolean) {
             return "(" + var_ref->var_name + std::string(kBoolToStringTernary) + ")";
           }
+        } else { // currently only in the case of class attribute such as quote.price
+          return "std::to_string(" + var_ref->var_name + "())";
         }
       }
+
+      // if not declared, then we are working with
+      // a class attribute such as quote.price
+      if (it == variable_types_.end()) {
+        return var_ref->var_name + "()";
+      }
+
       return var_ref->var_name;
     }
 
@@ -571,7 +581,7 @@ bool FileMaker::MakeVariableDeclaration(const Command &command) {
   VariableType var_type = InferExpressionType(command.expression.get());
 
   auto it = variable_types_.find(command.variable_name);
-  bool already_declared = (it != variable_types_.end());
+  bool already_declared = it != variable_types_.end();
 
   variable_types_[command.variable_name] = var_type;
 

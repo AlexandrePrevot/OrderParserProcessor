@@ -499,7 +499,7 @@ TEST(IfStatementTest, ReactOnInsideElseBlock) {
 
   EXPECT_NE(generated.find("if (x > 10) {"), std::string::npos);
   EXPECT_NE(generated.find("} else {"), std::string::npos);
-  EXPECT_NE(generated.find("reacton_service.RegisterReaction(\"MSFT\", 2, [=, &reacton_service]()"), std::string::npos);
+  EXPECT_NE(generated.find("reacton_service.RegisterReaction(\"MSFT\", 2, [=, &reacton_service](const internal::PriceUpdate &quote)"), std::string::npos);
   EXPECT_NE(generated.find("ReactOnService reacton_service"), std::string::npos);
 }
 
