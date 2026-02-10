@@ -11,7 +11,8 @@
 
 class FileMaker {
 public:
-  FileMaker(const std::vector<Command> &commands);
+  FileMaker(const std::vector<Command> &commands, const std::string &username,
+            const std::string &script_title);
 
   inline std::string GetCode() const { return output_; }
   inline bool Compiled() const { return compiled_; }
@@ -56,6 +57,8 @@ private:
   }
 
   void SetGRPC();
+  void SetScriptInfo(const std::string &username,
+                     const std::string &script_title);
 
   std::list<std::pair<long, std::string>> code_;
   std::unordered_set<std::string> includes_;

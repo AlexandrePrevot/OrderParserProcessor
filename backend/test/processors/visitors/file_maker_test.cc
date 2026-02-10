@@ -18,7 +18,7 @@ TEST(FileMakerTest, MakeCppFile) {
 
   c1.in_scope.push_back(c2);
 
-  FileMaker fm({c1, c2, c3});
+  FileMaker fm({c1, c2, c3}, "test_user", "test_script");
 
   std::cout << fm.GetCode() << std::endl;
   fm.GenerateScript();

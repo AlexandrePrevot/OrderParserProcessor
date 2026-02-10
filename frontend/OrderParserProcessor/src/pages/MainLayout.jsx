@@ -1,17 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Scripts from "./scripts/Scripts"
 import MarketData from "./market-data/MarketData"
 import Book from "./book/Book";
 import SideBar from "./SideBar";
+import NotificationBar from "./NotificationBar";
 import NotFound from "./NotFound";
 
 function MainLayout() {
+    const [notifications, setNotifications] = useState([]);
+
     useEffect(() => {
         const ws = new WebSocket("ws://localhost:8000/ws");
 
         ws.onmessage = (event) => {
-            alert(event.data);
+            const obj = JSON.parse(event.data);
+            const newNotification = {
+                id: Date.now(),
+                message: obj.message,
+                user: obj.user,
+                script_title: obj.script_title,
+                timestamp: new Date(),
+            };
+            setNotifications(prev => [newNotification, ...prev]);
         };
 
         ws.onerror = (error) => {
@@ -25,9 +36,13 @@ function MainLayout() {
         return () => ws.close();
     }, []);
 
+    const removeNotification = (id) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+    };
+
     return (
         <BrowserRouter>
-            <div className ="flex">
+            <div className="flex">
                 <SideBar />
                 <Routes>
                     <Route path="book" element={<Book />} />
@@ -35,6 +50,10 @@ function MainLayout() {
                     <Route path="scripts" element={<Scripts />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
+                <NotificationBar
+                    notifications={notifications}
+                    onRemove={removeNotification}
+                />
             </div>
         </BrowserRouter>
     );

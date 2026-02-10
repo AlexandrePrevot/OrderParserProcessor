@@ -19,7 +19,7 @@ TEST(NestedCommandsTest, ReactOnInsideSchedule) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -48,7 +48,7 @@ TEST(NestedCommandsTest, ScheduleInsideReactOn) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -74,7 +74,7 @@ TEST(NestedCommandsTest, OnlyScheduleNoNesting) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -101,7 +101,7 @@ TEST(NestedCommandsTest, ReactOnInsideReactOn) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -136,7 +136,7 @@ TEST(NestedCommandsTest, MultipleScheduleAndReactOnAtSameLevel) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(4, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -178,7 +178,7 @@ TEST(NestedCommandsTest, ComplexNestedWithScheduleAndReactOn) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -221,7 +221,7 @@ TEST(NestedCommandsTest, FullScriptFromFile) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(5, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();

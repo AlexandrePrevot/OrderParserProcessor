@@ -16,5 +16,6 @@ public:
 private:
   std::shared_ptr<internal::SynchronousReply> synchronous_reply_;
 
-  bool Parse(const std::string &code);
+  bool Parse(const std::string &code, const std::string &username,
+             const std::string &script_title);
 };

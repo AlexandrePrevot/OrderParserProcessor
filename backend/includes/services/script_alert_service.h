@@ -11,7 +11,7 @@ public:
   ScriptAlertService(ScriptAlertService &&) = delete;
   ScriptAlertService &operator=(ScriptAlertService &&) = delete;
 
-  void SendAlert(const std::string &user, const std::string &message);
+  void SendAlert(const std::string &message);
 
 
 private:

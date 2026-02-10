@@ -1,5 +1,6 @@
 import sys
 import os
+from contextlib import asynccontextmanager
 
 root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 proto_gen_dir = os.path.abspath(os.path.join(root_dir, "generated/python/"))
@@ -9,11 +10,24 @@ sys.path.insert(0, proto_gen_dir)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.views import router
+from routes.views import router, script_to_api_handler
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start gRPC server
+    await script_to_api_handler.start()
+    print("FastAPI app started with gRPC server")
+
+    yield
+
+    # Shutdown: Stop gRPC server
+    await script_to_api_handler.stop()
+    print("FastAPI app shutdown complete")
 
 
 def create_app() -> FastAPI:
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
 
     # CORS setup: allow React frontend (Vite runs on port 5173 by default)
     origins = [

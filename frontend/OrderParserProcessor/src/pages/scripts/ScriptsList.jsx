@@ -74,8 +74,6 @@ const Tab = styled.button`
 
 function List({ AlgoScripList, onSelectedScript }) {
     const handleSelectScript = (AlgoScript) => {
-        console.log("neww change after clicking")
-        console.log(AlgoScript['content'])
         onSelectedScript(AlgoScript);
     };
     return (
@@ -213,9 +211,6 @@ function ScriptsList() {
     const handleScriptCreation = () => {
         let new_script = createScriptSubmit("New Script", "New Script !", "New Script Summary !", "Jean Baptiste")
         setScriptList([...scriptList, new_script]);
-
-        console.log("script list is now : ");
-        console.log(scriptList);
     };
 
     return (

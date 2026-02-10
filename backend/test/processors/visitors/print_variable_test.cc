@@ -14,7 +14,7 @@ TEST(PrintVariableTest, SimpleStringVariable) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -37,7 +37,7 @@ TEST(PrintVariableTest, NumericExpression) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();
@@ -58,7 +58,7 @@ TEST(PrintVariableTest, PlainStringLiteral) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string generated = maker.GetCode();

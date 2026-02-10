@@ -11,7 +11,9 @@
 bool ScriptSubmitProcessor::Process(
     const internal::ScriptSubmitRequest &script_submit_request) {
 
-  const bool parsed = Parse(script_submit_request.content());
+  const bool parsed = Parse(script_submit_request.content(),
+                            script_submit_request.user(),
+                            script_submit_request.title());
 
   if (!parsed) {
     std::cout << "could not compile given code" << std::endl;
@@ -22,7 +24,9 @@ bool ScriptSubmitProcessor::Process(
   return parsed;
 }
 
-bool ScriptSubmitProcessor::Parse(const std::string &code) {
+bool ScriptSubmitProcessor::Parse(const std::string &code,
+                                   const std::string &username,
+                                   const std::string &script_title) {
   ConcreteFiScriptVisitor visitor;
   if (!visitor.Compile(code)) {
     return false;
@@ -30,7 +34,7 @@ bool ScriptSubmitProcessor::Parse(const std::string &code) {
 
   const auto &commands = visitor.get_commands_list();
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, username, script_title);
 
   if (!maker.Compiled()) {
     return false;

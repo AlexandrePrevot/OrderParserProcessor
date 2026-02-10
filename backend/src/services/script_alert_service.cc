@@ -4,6 +4,7 @@
 #include <google/protobuf/util/time_util.h>
 
 #include "messages/script_alert_notif.pb.h"
+#include "processors/common/script_info.h"
 
 ScriptAlertService::ScriptAlertService() {
   channel_ = grpc::CreateChannel("localhost:50053",
@@ -13,15 +14,15 @@ ScriptAlertService::ScriptAlertService() {
 
 ScriptAlertService::~ScriptAlertService() = default;
 
-void ScriptAlertService::SendAlert(const std::string &user,
-                                   const std::string &message) {
+void ScriptAlertService::SendAlert(const std::string &message) {
   grpc::ClientContext context;
   internal::ScriptAlertNotif request;
   google::protobuf::Empty response;
 
-  request.set_user(user);
+  ScriptInfo& script_info = ScriptInfo::GetInstance();
+  request.set_user(script_info.GetUsername());
   request.set_message(message);
-  request.set_script_title("FiScript");
+  request.set_script_title(script_info.GetScriptTitle());
 
   *request.mutable_creation_time() =
       google::protobuf::util::TimeUtil::GetCurrentTime();

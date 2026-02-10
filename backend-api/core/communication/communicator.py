@@ -1,4 +1,5 @@
 import grpc
+import json
 from google.protobuf import empty_pb2
 
 import services.api_to_core_pb2_grpc
@@ -38,12 +39,17 @@ class ScriptToApiServicer(services.script_to_api_pb2_grpc.ScriptToApiServicer):
         self.notif_callback = notif_callback
 
     async def ScriptAlert(self, request, context):
+        data = {}
+        data['script_title'] = request.script_title
+        data['user'] = request.user
+        data['message'] = request.message
         print("Received ScriptAlert:")
         print(f"Script Title: {request.script_title}")
         print(f"User: {request.user}")
         print(f"Message: {request.message}")
+        str_data = json.dumps(data)
 
-        await self.notif_callback(request)
+        await self.notif_callback(str_data)
 
         return empty_pb2.Empty()
 

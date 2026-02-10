@@ -11,7 +11,8 @@ router = APIRouter()
 websocket_queue = asyncio.Queue()
 
 async def notif_callback(notification):
-    """Callback function to handle notifications from scripts or other sources"""
+    """ Callback function to handle notifications from scripts or other sources, 
+        expects a stringified JSON """
     await websocket_queue.put(notification)
 
 api_to_core_handler = ApiToCoreHandler()
@@ -27,10 +28,9 @@ def index():
 @router.websocket('/ws')
 async def websocket_endpoint(websocket: WebSocket):
     await websocket_manager.connect(websocket)
-    await script_to_api_handler.start()  # Start the gRPC server to receive notifications
     try:
         while True:
-            # necessary when client disconnects, so that 
+            # necessary when client disconnects, so that
             # a task is not awaken when filling the queue
             # on a disconnected websocket, which would raise an error
             queue_task = asyncio.create_task(websocket_queue.get())
@@ -55,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if queue_task in done:
                 notification = await queue_task
                 await websocket_manager.send_personal_message(
-                    str(notification),
+                    notification,
                     websocket
                 )
     except Exception as e:

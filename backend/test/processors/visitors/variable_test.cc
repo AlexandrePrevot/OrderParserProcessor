@@ -13,7 +13,7 @@ TEST(VariableExpressionTest, SimpleStringPlusNumber) {
   EXPECT_EQ("myString", commands[0].variable_name);
   EXPECT_NE(nullptr, commands[0].expression.get());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("std::string myString"), std::string::npos);
@@ -28,7 +28,7 @@ TEST(VariableExpressionTest, StringPlusParentheses) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("std::string myString"), std::string::npos);
@@ -41,7 +41,7 @@ TEST(VariableExpressionTest, StringPlusStringPlusNumber) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("std::string myString"), std::string::npos);
@@ -57,7 +57,7 @@ TEST(VariableExpressionTest, ComplexNested) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   std::cout << "Generated code for complex nested:\n" << code << std::endl;
@@ -72,7 +72,7 @@ TEST(VariableExpressionTest, StringConcatenation) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 }
 
@@ -83,7 +83,7 @@ TEST(VariableExpressionTest, StringWithEvaluation) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 
   std::string code = maker.GetCode();
@@ -99,7 +99,7 @@ TEST(VariableExpressionTest, StringWithMultiplication) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
 }
 
@@ -113,7 +113,7 @@ TEST(VariableExpressionTest, CompoundAssignmentNumeric) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("double myNum"), std::string::npos);
@@ -130,7 +130,7 @@ TEST(VariableExpressionTest, CompoundAssignmentString) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("std::string myString"), std::string::npos);
@@ -144,7 +144,7 @@ TEST(VariableExpressionTest, PureNumericExpression) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(1, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("double result"), std::string::npos);
@@ -160,7 +160,7 @@ TEST(VariableExpressionTest, VariableReference) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("double a"), std::string::npos);
@@ -177,7 +177,7 @@ TEST(VariableExpressionTest, RedeclarationWithoutType) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   std::cout << "Generated code for redeclaration:\n" << code << std::endl;
@@ -205,7 +205,7 @@ TEST(BooleanExpressionTest, BooleanLiterals) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("bool myTrue = true"), std::string::npos);
@@ -224,7 +224,7 @@ TEST(BooleanExpressionTest, LogicalOperators) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(4, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("bool myOrVar = myTrue || myFalse"), std::string::npos);
@@ -243,7 +243,7 @@ TEST(BooleanExpressionTest, ComparisonOperators) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(4, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("bool result1 = 3 > 4"), std::string::npos);
@@ -262,7 +262,7 @@ TEST(BooleanExpressionTest, BooleanInPrint) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("bool myTrue"), std::string::npos);
@@ -279,7 +279,7 @@ TEST(BooleanExpressionTest, ComparisonInPrint) {
   const auto &commands = visitor.get_commands_list();
   ASSERT_EQ(2, commands.size());
 
-  FileMaker maker(commands);
+  FileMaker maker(commands, "test_user", "test_script");
   EXPECT_TRUE(maker.Compiled());
   std::string code = maker.GetCode();
   EXPECT_NE(code.find("bool myVar = 3 > 4"), std::string::npos);

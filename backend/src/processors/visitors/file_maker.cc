@@ -10,7 +10,9 @@
 constexpr std::string_view kEndIncludes = "// ----- end includes";
 constexpr std::string_view kBoolToStringTernary = " ? \"True\" : \"False\"";
 
-FileMaker::FileMaker(const std::vector<Command> &commands) {
+FileMaker::FileMaker(const std::vector<Command> &commands,
+                     const std::string &username,
+                     const std::string &script_title) {
   compiled_ = true;
   code_.push_back({0, "#include <grpcpp/grpcpp.h>"});
   code_.push_back({0, "// ----- end includes"});
@@ -27,6 +29,8 @@ FileMaker::FileMaker(const std::vector<Command> &commands) {
     code_it_++;
   code_it_++;
   tab_to_add_ = 0;
+
+  SetScriptInfo(username, script_title);
 
   for (const auto &command : commands) {
     if (!AddCommand(command)) {
@@ -292,12 +296,12 @@ bool FileMaker::MakeAlertCommand(const Command &command) {
   std::cout << "adding the alert command" << std::endl;
 
   long tab = code_it_->first;
-  
+
   AddAlertService(command);
 
 
   std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
-  InsertCode(std::string("script_alert_service.SendAlert(\"User\", ") + expr_code + ");",
+  InsertCode(std::string("script_alert_service.SendAlert(") + expr_code + ");",
              tab);
 
   return true;
@@ -757,4 +761,15 @@ void FileMaker::SetGRPC() {
       {1, "std::unique_ptr<grpc::Server> server(builder.BuildAndStart());"});
   code_.push_back({1, "server->Wait();"});
   code_.push_back({0, "}"});
+}
+
+void FileMaker::SetScriptInfo(const std::string &username,
+                              const std::string &script_title) {
+  InsertInclude("\"processors/common/script_info.h\"", true);
+  InsertCode("{", 1);
+  InsertCode("ScriptInfo& script_info = ScriptInfo::GetInstance();", 2);
+  InsertCode("script_info.SetUsername(\"" + username + "\");", 2);
+  InsertCode("script_info.SetScriptTitle(\"" + script_title + "\");", 2);
+  InsertCode("}", 1);
+  InsertCode("", 0);
 }
