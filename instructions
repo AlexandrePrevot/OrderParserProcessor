@@ -51,6 +51,7 @@ npm run dev
 
 
 tech debt:
+- fix time in alerts and price_update (currently frontend displays the time of reception of the message, not the time of the event)
 - support multiple user sessions (currently only one websocket queue)
 - make sure the grpc server in backend-api is stopped cleanly on shutdown
 - support multiple feeds for connectivity to market data providers
