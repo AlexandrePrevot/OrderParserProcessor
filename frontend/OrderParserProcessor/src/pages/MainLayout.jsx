@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Scripts from "./scripts/Scripts"
 import MarketData from "./market-data/MarketData"
@@ -10,12 +10,19 @@ import NotFound from "./NotFound";
 function MainLayout() {
     const [notifications, setNotifications] = useState([]);
     const [notifCollapsed, setNotifCollapsed] = useState(false);
+    const marketDataRef = useRef(null);
 
     useEffect(() => {
         const ws = new WebSocket("ws://localhost:8000/ws");
 
         ws.onmessage = (event) => {
             const obj = JSON.parse(event.data);
+
+            if (obj.MessageType === "price_update") {
+                marketDataRef.current?.addPoint(obj.price);
+                return;
+            }
+
             const newNotification = {
                 id: Date.now(),
                 message: obj.message,
@@ -48,7 +55,7 @@ function MainLayout() {
                 <div style={{ flex: 1, marginRight: notifCollapsed ? 40 : 280 }}>
                     <Routes>
                         <Route path="book" element={<Book />} />
-                        <Route path="marketdata" element={<MarketData />} />
+                        <Route path="marketdata" element={<MarketData ref={marketDataRef} />} />
                         <Route path="scripts" element={<Scripts />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>

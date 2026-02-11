@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useImperativeHandle, forwardRef } from "react";
 import {
     Chart as ChartJS,
     LineElement,
@@ -181,29 +181,13 @@ function addPoint(chartRef, price) {
     chart.update("none");
 }
 
-function useMockMarketData(chartRef) {
-    const priceRef = useRef(100);
-
-    let count = 0;
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            count++;
-            console.log("Updating market data, count:", count);
-            priceRef.current += (Math.random() - 0.5) * 2;
-            if (count % 20 === 0) {
-                addMarker(chartRef, priceRef.current, "Buy signal");
-            }
-            addPoint(chartRef, priceRef.current);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [chartRef]);
-}
-
-function MarketData() {
+const MarketData = forwardRef(function MarketData(props, ref) {
     const chartRef = useRef(null);
-    useMockMarketData(chartRef);
+
+    useImperativeHandle(ref, () => ({
+        addPoint: (price) => addPoint(chartRef, price),
+        addMarker: (price, label) => addMarker(chartRef, price, label),
+    }));
 
     return (
         <div className="flex flex-col w-full h-screen p-4 bg-gray-950">
@@ -213,6 +197,6 @@ function MarketData() {
             </div>
         </div>
     );
-}
+});
 
 export default MarketData;

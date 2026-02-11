@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import asyncio
 
 from models import AlgoScript
-from core.communication.communicator import ApiToCoreHandler, ScriptToApiHandler, WebSocketManager
+from core.communication.communicator import ApiToCoreHandler, DistributorToApiHandler, ScriptToApiHandler, WebSocketManager
 
 
 router = APIRouter()
@@ -17,6 +17,7 @@ async def notif_callback(notification):
 
 api_to_core_handler = ApiToCoreHandler()
 script_to_api_handler = ScriptToApiHandler(notif_callback)
+distributor_to_api_handler = DistributorToApiHandler(notif_callback)
 websocket_manager = WebSocketManager()
 
 
