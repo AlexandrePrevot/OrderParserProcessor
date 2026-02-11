@@ -47,7 +47,7 @@ function NotificationItem({ notification, onRemove, isNew }) {
     );
 }
 
-function NotificationBar({ notifications = [], onRemove }) {
+function NotificationBar({ notifications = [], onRemove, collapsed, onToggleCollapse }) {
     const [expanded, setExpanded] = useState(false);
     const [newIds, setNewIds] = useState(new Set());
     const prevIdsRef = useRef(new Set());
@@ -75,6 +75,57 @@ function NotificationBar({ notifications = [], onRemove }) {
     const hasMore = notifications.length > visibleCount;
     const displayedNotifications = expanded ? notifications : notifications.slice(0, visibleCount);
 
+    if (collapsed) {
+        return (
+            <div style={{
+                width: 40,
+                position: 'fixed',
+                right: 0,
+                top: 0,
+                height: '100vh',
+                backgroundColor: '#111827',
+                color: 'white',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                borderLeft: '1px solid #374151',
+            }}>
+                <button
+                    onClick={onToggleCollapse}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        padding: '12px 0',
+                        fontSize: '18px',
+                        position: 'relative',
+                    }}
+                    title="Open notifications"
+                >
+                    🔔
+                    {notifications.length > 0 && (
+                        <span style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: -2,
+                            backgroundColor: '#ef4444',
+                            borderRadius: '50%',
+                            width: 16,
+                            height: 16,
+                            fontSize: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            {notifications.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+        );
+    }
+
     return (
         <>
             <style>{slideInKeyframes}</style>
@@ -98,6 +149,19 @@ function NotificationBar({ notifications = [], onRemove }) {
                     alignItems: 'center',
                 }}>
                     <span>Notifications ({notifications.length})</span>
+                    <button
+                        onClick={onToggleCollapse}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#9ca3af',
+                            cursor: 'pointer',
+                            fontSize: '18px',
+                        }}
+                        title="Collapse"
+                    >
+                        »
+                    </button>
                 </div>
 
                 <div style={{

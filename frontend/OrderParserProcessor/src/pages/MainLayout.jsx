@@ -9,6 +9,7 @@ import NotFound from "./NotFound";
 
 function MainLayout() {
     const [notifications, setNotifications] = useState([]);
+    const [notifCollapsed, setNotifCollapsed] = useState(false);
 
     useEffect(() => {
         const ws = new WebSocket("ws://localhost:8000/ws");
@@ -44,15 +45,19 @@ function MainLayout() {
         <BrowserRouter>
             <div className="flex">
                 <SideBar />
-                <Routes>
-                    <Route path="book" element={<Book />} />
-                    <Route path="marketdata" element={<MarketData />} />
-                    <Route path="scripts" element={<Scripts />} />
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
+                <div style={{ flex: 1, marginRight: notifCollapsed ? 40 : 280 }}>
+                    <Routes>
+                        <Route path="book" element={<Book />} />
+                        <Route path="marketdata" element={<MarketData />} />
+                        <Route path="scripts" element={<Scripts />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </div>
                 <NotificationBar
                     notifications={notifications}
                     onRemove={removeNotification}
+                    collapsed={notifCollapsed}
+                    onToggleCollapse={() => setNotifCollapsed(prev => !prev)}
                 />
             </div>
         </BrowserRouter>
