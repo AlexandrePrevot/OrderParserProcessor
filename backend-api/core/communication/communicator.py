@@ -1,9 +1,11 @@
+import asyncio
 import grpc
 import json
 from google.protobuf import empty_pb2
 
 import services.api_to_core_pb2_grpc
 import services.script_to_api_pb2_grpc
+import services.marketdata_pb2_grpc
 
 import messages.script_submit_pb2
 
@@ -32,6 +34,35 @@ class ApiToCoreHandler:
         print("communication finished")
 
 
+class DistributorToApiHandler:
+
+    def __init__(self, notif_callback):
+        self.channel = grpc.aio.insecure_channel('localhost:50052')
+        self.stub = services.marketdata_pb2_grpc.MarketDataServiceStub(self.channel)
+        self.notif_callback = notif_callback
+        self._stream_task = None
+
+    async def start_streaming(self):
+        self._stream_task = asyncio.create_task(self._listen())
+
+    async def _listen(self):
+        try:
+            stream = self.stub.StreamPrices(empty_pb2.Empty())
+            async for price_update in stream:
+                data = {}
+                data['MessageType'] = 'price_update'
+                data['price'] = price_update.price
+                data['quantity'] = price_update.quantity
+                await self.notif_callback(json.dumps(data))
+        except grpc.RpcError as err:
+            print(f"StreamPrices error: {err}")
+
+    async def stop(self):
+        if self._stream_task:
+            self._stream_task.cancel()
+        await self.channel.close()
+
+
 class ScriptToApiServicer(services.script_to_api_pb2_grpc.ScriptToApiServicer):
     """gRPC servicer to receive notifications from scripts"""
 
@@ -40,6 +71,7 @@ class ScriptToApiServicer(services.script_to_api_pb2_grpc.ScriptToApiServicer):
 
     async def ScriptAlert(self, request, context):
         data = {}
+        data['MessageType'] = 'script_alert'
         data['script_title'] = request.script_title
         data['user'] = request.user
         data['message'] = request.message
@@ -97,6 +129,7 @@ class WebSocketManager:
         print(f"WebSocket disconnected: {websocket.client}")
 
     async def send_personal_message(self, message: str, websocket):
+        print(f"Sending message to {websocket.client}: {message}")
         await websocket.send_text(message)
 
     async def broadcast(self, message: str):
