@@ -3,7 +3,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import styled from "styled-components";
 
 import createScriptSubmit from "../../structures/ScriptSubmit"
-import { handleScriptRequest } from "../../backend-api/ScriptRequestHandler";
+import { handleScriptRequest, handleActivateScript } from "../../backend-api/ScriptRequestHandler";
 import { Editor } from "@monaco-editor/react";
 
 //Button style got from https://react.school/ui/button
@@ -141,6 +141,19 @@ function AlgoScript({ selectedScript, setScriptList, scriptList}) {
         }
     };
 
+    const handleToggleActivation = async () => {
+        if (!selectedScript) return;
+        try {
+            const result = await handleActivateScript(
+                selectedScript.user,
+                selectedScript.title
+            );
+            selectedScript.active = result.active;
+            setScriptList([...scriptList]);
+        } catch (error) {
+            console.error("Activation toggle failed:", error.message);
+        }
+    };
 
     // when adding too many lines, can't see the title anymore
     return (
@@ -162,8 +175,8 @@ function AlgoScript({ selectedScript, setScriptList, scriptList}) {
                         <Button onClick={handleSave}>
                             Save
                         </Button>
-                        <Button className="px-4 py-2 rounded on">
-                            Activate/Deactivate
+                        <Button onClick={handleToggleActivation} theme={selectedScript?.active ? "pink" : "blue"}>
+                            {selectedScript?.active ? "Deactivate" : "Activate"}
                         </Button>
                     </div>
                     <div style={{ height: "80%" }}>

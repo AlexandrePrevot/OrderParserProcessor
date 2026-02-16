@@ -10,7 +10,7 @@ sys.path.insert(0, proto_gen_dir)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.views import router, script_to_api_handler, distributor_to_api_handler
+from routes.views import router, script_to_api_handler, distributor_to_api_handler, process_manager
 
 
 @asynccontextmanager
@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    process_manager.shutdown_all()
     await script_to_api_handler.stop()
     await distributor_to_api_handler.stop()
     print("FastAPI app shutdown complete")
