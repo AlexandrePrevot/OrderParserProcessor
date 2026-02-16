@@ -16,33 +16,42 @@ protected:
 
 TEST_F(PythonApiGtwTest, GatewayInitializes) {
   EXPECT_NE(gateway_, nullptr);
+  EXPECT_FALSE(gateway_->IsRunning());
 }
 
-TEST_F(PythonApiGtwTest, ConnectToGtwHandlesNullWriter) {
-  bool result = gateway_->ConnectToGtw(nullptr);
+TEST_F(PythonApiGtwTest, SubscribeReturnsValidSubscription) {
+  auto subscription = gateway_->Subscribe();
 
-  EXPECT_FALSE(result);
+  EXPECT_NE(subscription, nullptr);
+  EXPECT_TRUE(subscription->active.load());
 }
 
-TEST_F(PythonApiGtwTest, ActivateDoesNotCrash) {
-  EXPECT_NO_THROW(gateway_->Activate());
+TEST_F(PythonApiGtwTest, UnsubscribeDoesNotCrash) {
+  auto subscription = gateway_->Subscribe();
+  EXPECT_NO_THROW(gateway_->Unsubscribe(subscription));
 }
 
-TEST_F(PythonApiGtwTest, DestructorCleansUpThreads) {
-  // Create and destroy gateway multiple times
-  // This tests that destructor properly joins threads
+TEST_F(PythonApiGtwTest, MultipleSubscriptions) {
+  auto sub1 = gateway_->Subscribe();
+  auto sub2 = gateway_->Subscribe();
+  auto sub3 = gateway_->Subscribe();
+
+  EXPECT_NE(sub1, sub2);
+  EXPECT_NE(sub2, sub3);
+
+  gateway_->Unsubscribe(sub2);
+  gateway_->Unsubscribe(sub1);
+  gateway_->Unsubscribe(sub3);
+}
+
+TEST_F(PythonApiGtwTest, DestructorCleansUp) {
   for (int i = 0; i < 5; ++i) {
     auto temp_gateway = std::make_unique<PythonApiGtw>();
-    // Destructor should clean up without hanging
   }
 
   SUCCEED();
 }
 
-// Note: Testing actual socket reading and JSON parsing requires either:
-// 1. A mock socket implementation (requires refactoring PythonApiGtw)
-// 2. A real test TCP server on port 9000
-// 3. Dependency injection for the socket/reader
-//
-// Additionally, grpc::ServerWriter is marked 'final' so it cannot be mocked.
-// To fully test parsing logic and streaming, refactor for dependency injection.
+// Note: Testing Start() and actual streaming requires either:
+// 1. A real Python gateway running on port 9000
+// 2. Refactoring to inject the socket/transport layer

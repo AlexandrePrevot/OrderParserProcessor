@@ -1,40 +1,65 @@
 #include "services/market_data_service.h"
+
+#include <chrono>
+#include <google/protobuf/timestamp.pb.h>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 
 MarketDataService::MarketDataService()
-    : python_gateway_(std::make_unique<PythonApiGtw>()) {
+    : gateway_(std::make_shared<PythonApiGtw>()) {
+  gateway_->Start();
   std::cout << "MarketDataService initialized" << std::endl;
 }
 
 grpc::Status MarketDataService::StreamPrices(
-    grpc::ServerContext* context,
-    const google::protobuf::Empty* /*request*/,
-    grpc::ServerWriter<internal::PriceUpdate>* writer) {
+    grpc::ServerContext *context, const google::protobuf::Empty * /*request*/,
+    grpc::ServerWriter<internal::PriceUpdate> *writer) {
 
   ++call_count_;
 
-  std::cout << "Client connected to StreamPrices (call #" << call_count_ << ")" << std::endl;
+  std::cout << "Client connected to StreamPrices (call #" << call_count_ << ")"
+            << std::endl;
 
   try {
-    if (!python_gateway_) {
+    if (!gateway_) {
       throw std::runtime_error("Python gateway not initialized");
     }
 
-    // Connect to Python gateway and start streaming prices
-    // This will block until the connection closes
-    bool success = python_gateway_->ConnectToGtw(writer);
+    auto subscription = gateway_->Subscribe();
 
-    if (!success) {
-      ++failed_call_count_;
-      return grpc::Status(
-          grpc::StatusCode::INTERNAL,
-          "Failed to connect to Python API Gateway");
+    while (!context->IsCancelled() && subscription->active.load()) {
+      MarketDataPoint data_point;
+
+      if (subscription->queue.pop(data_point)) {
+        internal::PriceUpdate price_update;
+        price_update.set_price(data_point.price);
+        price_update.set_quantity(data_point.quantity);
+        price_update.set_instrument_id(data_point.instrument_id);
+
+        auto *timestamp = price_update.mutable_timestamp();
+        timestamp->set_seconds(data_point.timestamp_seconds);
+        timestamp->set_nanos(data_point.timestamp_nanos);
+
+        if (!writer->Write(price_update)) {
+          std::cerr << "Failed to write to gRPC stream (client disconnected)"
+                    << std::endl;
+          break;
+        } else {
+          std::cout << "Sent price update: " << data_point.instrument_id
+                    << " price=" << data_point.price
+                    << " quantity=" << data_point.quantity << std::endl;
+        }
+      } else {
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+      }
     }
 
-    std::cout << "StreamPrices completed successfully" << std::endl;
+    gateway_->Unsubscribe(subscription);
 
-  } catch (const std::exception& except) {
+    std::cout << "StreamPrices completed for client" << std::endl;
+
+  } catch (const std::exception &except) {
     ++failed_call_count_;
 
     std::cerr << "Exception in StreamPrices: " << except.what() << std::endl;

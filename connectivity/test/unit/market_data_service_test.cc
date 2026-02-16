@@ -21,7 +21,6 @@ TEST_F(MarketDataServiceTest, ServiceInitializes) {
 // Note: Full testing of StreamPrices requires either:
 // 1. A real Python gateway running on port 9000 (integration test)
 // 2. Refactoring PythonApiGtw to accept injected socket dependency
-// 3. Using test doubles for the socket connection
 //
 // Additionally, grpc::ServerWriter is marked 'final' so it cannot be mocked
 // via inheritance. Testing the streaming behavior requires refactoring
