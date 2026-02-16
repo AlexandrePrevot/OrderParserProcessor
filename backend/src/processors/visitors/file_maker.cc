@@ -5,14 +5,32 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 constexpr std::string_view kEndIncludes = "// ----- end includes";
 constexpr std::string_view kBoolToStringTernary = " ? \"True\" : \"False\"";
 
+
+std::string RemoveSpaceAndMaj(const std::string& str) {
+  std::string result;
+  for (char c : str) {
+    if (c == ' ') {
+      result.push_back('_');
+    } else if (c >= 'A' && c <= 'Z') {
+      result.push_back(std::tolower(c));
+    } else {
+      result.push_back(c);
+    }
+  }
+  return result;
+}
+
 FileMaker::FileMaker(const std::vector<Command> &commands,
                      const std::string &username,
                      const std::string &script_title) {
+  username_ = RemoveSpaceAndMaj(username);
+  script_title_ = RemoveSpaceAndMaj(script_title);
   compiled_ = true;
   code_.push_back({0, "#include <grpcpp/grpcpp.h>"});
   code_.push_back({0, "// ----- end includes"});
@@ -52,7 +70,8 @@ void FileMaker::GenerateScript() const noexcept {
   // Call Python script (keep as you have it)
   std::stringstream cmd;
   cmd << "python3 $ORDER_PARSER_PROCESSOR_ROOT/backend/src/system_builder.py "
-         "--scriptName \"MyScriptAlexandrePrevot\" --includes ";
+         "--scriptName \""
+      << script_title_ << "\" --username \"" << username_ << "\" --includes ";
 
   for (const std::string &include : includes_) {
     cmd << include;
@@ -75,8 +94,8 @@ void FileMaker::GenerateScript() const noexcept {
 
   std::filesystem::path env(root);
 
-  // Build full path
-  std::filesystem::path mainPath = env / ".." / "output_bin" / "main.cc";
+  std::filesystem::path mainPath =
+      env / ".." / "output_bin" / username_ / script_title_ / "main.cc";
 
   // Ensure the directory exists
   std::filesystem::create_directories(mainPath.parent_path());
@@ -96,21 +115,19 @@ void FileMaker::GenerateScript() const noexcept {
     file.flush();
   }
 
-  std::filesystem::path out = env / ".." / "output_bin";
+  std::filesystem::path out =
+      env / ".." / "output_bin" / username_ / script_title_;
   std::filesystem::path build = out / "build";
 
   std::filesystem::create_directories(build);
 
-  // Change directory to build/
   std::filesystem::current_path(build);
 
-  // CMake
   if (std::system("cmake ..") != 0) {
     std::cerr << "CMake failed\n";
     return;
   }
 
-  // Make
   if (std::system("make -j 2") != 0) {
     std::cerr << "Make failed\n";
     return;

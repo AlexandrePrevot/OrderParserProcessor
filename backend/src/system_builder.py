@@ -18,6 +18,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--username",
+    nargs="*",
+    required=True
+)
+
+parser.add_argument(
     "--includes",
     nargs="*",
     required=True
@@ -26,13 +32,15 @@ parser.add_argument(
 args = parser.parse_args()
 
 script_name = args.scriptName[0]
+username = args.username[0]
 includes = args.includes
 
 print(f"building project for {script_name}")
 print(f"includes are {includes}")
 
 project_root = os.getenv("ORDER_PARSER_PROCESSOR_ROOT")
-output_root = project_root + "/../output_bin"
+output_root = project_root + "/../output_bin" + "/" + username + "/" + script_name
+os.makedirs(output_root, exist_ok=True)
 
 shutil.rmtree(output_root)
 

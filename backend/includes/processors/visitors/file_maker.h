@@ -60,6 +60,9 @@ private:
   void SetScriptInfo(const std::string &username,
                      const std::string &script_title);
 
+  std::string username_;
+  std::string script_title_;
+
   std::list<std::pair<long, std::string>> code_;
   std::unordered_set<std::string> includes_;
   std::unordered_set<Command::CommandType> history_;
