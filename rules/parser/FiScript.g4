@@ -1,6 +1,6 @@
 grammar FiScript;
 
-script   : statement* EOF ;
+script   : NEWLINE* statement* EOF ;
 
 statement
     : schedule
@@ -18,8 +18,8 @@ print   : PRINT '(' expression ')' NEWLINE* ;
 alert   : ALERT '(' expression ')' NEWLINE* ;
 if   : 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* ('else' block)? NEWLINE* ;
 
-variableDeclaration : IDENTIFIER '=' expression NEWLINE ;
-variableAssignment : IDENTIFIER COMPOUND_OP expression NEWLINE ;
+variableDeclaration : IDENTIFIER '=' expression NEWLINE* ;
+variableAssignment : IDENTIFIER COMPOUND_OP expression NEWLINE* ;
 
 expression
     : '(' expression ')'                          # ParenExpression
