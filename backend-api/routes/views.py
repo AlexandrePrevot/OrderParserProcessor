@@ -10,9 +10,11 @@ router = APIRouter()
 
 websocket_queue = asyncio.Queue()
 
+
 async def notif_callback(notification):
     """ Callback function to handle notifications from scripts or other sources, 
         expects a stringified JSON """
+    print(f"Received notification: {notification}")
     await websocket_queue.put(notification)
 
 api_to_core_handler = ApiToCoreHandler()

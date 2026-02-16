@@ -129,6 +129,7 @@ class WebSocketManager:
         print(f"WebSocket disconnected: {websocket.client}")
 
     async def send_personal_message(self, message: str, websocket):
+        print(f"Sending message to {websocket.client}: {message}")
         await websocket.send_text(message)
 
     async def broadcast(self, message: str):
