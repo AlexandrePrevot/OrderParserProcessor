@@ -14,3 +14,18 @@ export async function handleScriptRequest(request) {
   
     return response.json();
 }
+
+export async function handleActivateScript(user, title) {
+    const response = await fetch("http://localhost:8000/ActivateScript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user, title }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to toggle script activation");
+    }
+
+    return response.json();
+}

@@ -4,6 +4,7 @@ import asyncio
 
 from models import AlgoScript
 from core.communication.communicator import ApiToCoreHandler, DistributorToApiHandler, ScriptToApiHandler, WebSocketManager
+from core.process_manager import ProcessManager
 
 
 router = APIRouter()
@@ -21,6 +22,7 @@ api_to_core_handler = ApiToCoreHandler()
 script_to_api_handler = ScriptToApiHandler(notif_callback)
 distributor_to_api_handler = DistributorToApiHandler(notif_callback)
 websocket_manager = WebSocketManager()
+process_manager = ProcessManager()
 
 
 @router.get('/')
@@ -84,3 +86,26 @@ def create_script(script_request: AlgoScriptRequest):
     print("created a new algo (check db)")
     api_to_core_handler.ScriptSubmit(algo_script)
     return "Script is created from User " + algo_script.User
+
+
+class ActivateScriptRequest(BaseModel):
+    user: str
+    title: str
+
+
+@router.post('/ActivateScript')
+def activate_script(request: ActivateScriptRequest):
+    try:
+        now_active = process_manager.toggle(request.user, request.title)
+        return {
+            "status": "activated" if now_active else "deactivated",
+            "user": request.user,
+            "title": request.title,
+            "active": now_active,
+        }
+    except FileNotFoundError as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=404, content={"error": str(e)})
+    except RuntimeError as e:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=400, content={"error": str(e)})
