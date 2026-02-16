@@ -51,11 +51,10 @@ npm run dev
 
 
 tech debt:
-- fix time in alerts and price_update (currently frontend displays the time of reception of the message, not the time of the event)
+- BUG : fix time in alerts and price_update (currently frontend displays the time of reception of the message, not the time of the event)
+- BUG : when mixing ReactOn and Schedule, check that every manager has ended before script is finished
 - support multiple user sessions (currently only one websocket queue)
-- make sure the grpc server in backend-api is stopped cleanly on shutdown
 - support multiple feeds for connectivity to market data providers
-- support multiple scripts at the same time
 - support multiple instrument for reacton
 - insert data in the db (have a real active db instead of in memory only)
 - improve error handling everywhere
