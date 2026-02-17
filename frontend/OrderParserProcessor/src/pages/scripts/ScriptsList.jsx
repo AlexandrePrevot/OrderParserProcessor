@@ -6,29 +6,33 @@ import createScriptSubmit from "../../structures/ScriptSubmit"
 import { handleScriptRequest, handleActivateScript } from "../../backend-api/ScriptRequestHandler";
 import { Editor } from "@monaco-editor/react";
 
-//Button style got from https://react.school/ui/button
 const theme = {
     blue: {
-        default: "#3f51b5",
-        hover: "#283593",
+        default: "#3b82f6",
+        hover: "#2563eb",
     },
-    pink: {
-        default: "#e91e63",
-        hover: "#ad1457",
+    green: {
+        default: "#10b981",
+        hover: "#059669",
+    },
+    red: {
+        default: "#ef4444",
+        hover: "#dc2626",
     },
 };
 
 const Button = styled.button`
     background-color: ${(props) => theme[props.theme].default};
     color: white;
-    padding: 5px 15px;
-    border-radius: 5px;
+    padding: 6px 16px;
+    border-radius: 6px;
     outline: 0;
-    border: 0; 
+    border: 0;
     text-transform: uppercase;
-    margin: 10px 0px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
     cursor: pointer;
-    box-shadow: 0px 2px 2px lightgray;
     transition: ease background-color 250ms;
     &:hover {
       background-color: ${(props) => theme[props.theme].hover};
@@ -43,44 +47,67 @@ Button.defaultProps = {
     theme: "blue",
 };
 
-const ButtonToggle = styled(Button)`
-    opacity: 0.7;
-    ${({ active }) =>
-        active &&
-        `
-      opacity: 1; 
-    `}
-  `;
 
-const Tab = styled.button`
-    padding: 10px 30px;
-    cursor: pointer;
-    opacity: 0.6;
-    background: white;
-    border: 0;
-    outline: 0;
-    border-bottom: 2px solid transparent;
-    transition: ease border-bottom 250ms;
-    ${({ active }) =>
-        active &&
-        `
-      border-bottom: 2px solid black;
-      opacity: 1;
-    `}
-  `;
-
-
-
-
-function List({ AlgoScripList, onSelectedScript }) {
-    const handleSelectScript = (AlgoScript) => {
-        onSelectedScript(AlgoScript);
-    };
+function List({ AlgoScripList, selectedScript, onSelectedScript }) {
     return (
-        <div className="flex-wrap p-4 overflow-y-auto" style={{ maxHeight: "50vh" }}>
-            {AlgoScripList.map((AlgoScript) => (<Button onClick={() => handleSelectScript(AlgoScript)} className="px-4 py-2 rounded">
-                {AlgoScript.title}
-            </Button>))}
+        <div style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            backgroundColor: "#111827",
+        }}>
+            <div style={{
+                padding: "16px",
+                borderBottom: "1px solid #374151",
+                fontWeight: "bold",
+                color: "white",
+                fontSize: "14px",
+                letterSpacing: "0.5px",
+            }}>
+                Scripts
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
+                {AlgoScripList.map((script) => {
+                    const isSelected = selectedScript === script;
+                    return (
+                        <div
+                            key={script.title}
+                            onClick={() => onSelectedScript(script)}
+                            style={{
+                                padding: "10px 12px",
+                                marginBottom: "4px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                backgroundColor: isSelected ? "#374151" : "transparent",
+                                borderLeft: isSelected ? "3px solid #3b82f6" : "3px solid transparent",
+                                color: isSelected ? "white" : "#d1d5db",
+                                transition: "all 150ms ease",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                fontSize: "13px",
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!isSelected) e.currentTarget.style.backgroundColor = "#1f2937";
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
+                            }}
+                        >
+                            <span style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                backgroundColor: script.active ? "#10b981" : "#4b5563",
+                                flexShrink: 0,
+                            }} />
+                            {script.title}
+                        </div>
+                    );
+                })}
+            </div>
+            <div style={{ padding: "12px", borderTop: "1px solid #374151" }}>
+            </div>
         </div>
     );
 }
@@ -88,10 +115,10 @@ function List({ AlgoScripList, onSelectedScript }) {
 function CodeEditor({ value, onChange }) {
     return (
         <Editor
-            height="80%"
+            height="100%"
             value={value}
             onChange={(newValue) => onChange(newValue || "")}
-            theme="vs-light"
+            theme="vs-dark"
             options={{
                 fontSize: 14,
                 minimap: { enabled: false },
@@ -100,19 +127,20 @@ function CodeEditor({ value, onChange }) {
                 wordBasedSuggestions: false,
                 parameterHints: false,
                 tabCompletion: "off",
-                acceptSuggestionOnEnter: "off"
+                acceptSuggestionOnEnter: "off",
+                scrollBeyondLastLine: false,
+                padding: { top: 12 },
             }}
         />
     );
 }
 
 
-function AlgoScript({ selectedScript, setScriptList, scriptList}) {
+function AlgoScript({ selectedScript, setScriptList, scriptList }) {
     const [content, setContent] = useState('');
     const [summary, setSummary] = useState('');
     const [title, setTitle] = useState('');
-    
-    // monaco editor just pass the text when changing
+
     const handleContentChange = (val) => {
         if (selectedScript) {
             selectedScript.content = val;
@@ -155,59 +183,118 @@ function AlgoScript({ selectedScript, setScriptList, scriptList}) {
         }
     };
 
-    // when adding too many lines, can't see the title anymore
+    if (!selectedScript) {
+        return (
+            <div style={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#6b7280",
+                fontSize: "15px",
+            }}>
+                Select a script to start editing
+            </div>
+        );
+    }
+
     return (
-        <PanelGroup direction="vertical" style={{ height: "100%" }}>
-            <Panel style={{ height: "100%" }}>
-                <div style={{ height: "100%" }}>
-                    <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
-                        {
-                            selectedScript ?
-                            (
-                                <textarea  maxLength="30" placeholder="Script Title !" value={selectedScript.title} onChange={handleTitleChange} />
-                            ) :
-                            (
-                                <textarea placeholder="Create your script !" />
-                            )
-                        }
-                    </div>
-                    <div className="flex-wrap p-4">
-                        <Button onClick={handleSave}>
-                            Save
-                        </Button>
-                        <Button onClick={handleToggleActivation} theme={selectedScript?.active ? "pink" : "blue"}>
-                            {selectedScript?.active ? "Deactivate" : "Activate"}
-                        </Button>
-                    </div>
-                    <div style={{ height: "80%" }}>
-                        {selectedScript ?
-                            (
-                                <CodeEditor className="w-screen h-screen" value={selectedScript.content} onChange={handleContentChange} />
-                            ) :
-                            (
-                                <div>Select a file to view its content</div>
-                            )}
-                    </div>
+        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px 16px",
+                backgroundColor: "#111827",
+                borderBottom: "1px solid #374151",
+            }}>
+                <input
+                    type="text"
+                    maxLength="30"
+                    placeholder="Script Title"
+                    value={selectedScript.title}
+                    onChange={handleTitleChange}
+                    style={{
+                        background: "transparent",
+                        border: "none",
+                        outline: "none",
+                        color: "white",
+                        fontSize: "16px",
+                        fontWeight: 600,
+                        width: "300px",
+                        borderBottom: "1px solid transparent",
+                        paddingBottom: "2px",
+                        transition: "border-color 200ms",
+                    }}
+                    onFocus={(e) => e.target.style.borderBottomColor = "#3b82f6"}
+                    onBlur={(e) => e.target.style.borderBottomColor = "transparent"}
+                />
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <Button onClick={handleSave} theme="blue">
+                        Save
+                    </Button>
+                    <Button onClick={handleToggleActivation} theme="green">
+                        Activate/Deactivate
+                    </Button>
                 </div>
-            </Panel>
+            </div>
 
-            <PanelResizeHandle className="h-2 bg-blue-300" />
+            <PanelGroup direction="vertical" style={{ flex: 1 }}>
+                <Panel defaultSize={75}>
+                    <div style={{ height: "100%", backgroundColor: "#1e1e1e" }}>
+                        <CodeEditor value={selectedScript.content} onChange={handleContentChange} />
+                    </div>
+                </Panel>
 
-            <Panel>
-                <div>
-                    {
-                        selectedScript ?
-                            (
-                                <textarea className="w-screen h-screen" placeholder="Summary of the script..." value={selectedScript.summary} onChange={handleSummaryChange} />
-                            ) :
-                            (
-                                <textarea className="w-screen h-screen" placeholder="Summary of the script..." />
-                            )
-                    }
-                </div>
-            </Panel>
-        </PanelGroup>
-    )
+                <PanelResizeHandle style={{
+                    height: "4px",
+                    backgroundColor: "#1f2937",
+                    cursor: "row-resize",
+                    transition: "background-color 200ms",
+                }}
+                    className="hover:bg-blue-500"
+                />
+
+                <Panel>
+                    <div style={{
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        backgroundColor: "#111827",
+                    }}>
+                        <div style={{
+                            padding: "8px 16px",
+                            color: "#6b7280",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            borderBottom: "1px solid #374151",
+                        }}>
+                            Description
+                        </div>
+                        <textarea
+                            placeholder="Summary of the script..."
+                            value={selectedScript.summary}
+                            onChange={handleSummaryChange}
+                            style={{
+                                flex: 1,
+                                width: "100%",
+                                backgroundColor: "#1f2937",
+                                color: "#d1d5db",
+                                border: "none",
+                                outline: "none",
+                                padding: "12px 16px",
+                                fontSize: "14px",
+                                resize: "none",
+                                fontFamily: "inherit",
+                            }}
+                        />
+                    </div>
+                </Panel>
+            </PanelGroup>
+        </div>
+    );
 }
 
 function ScriptsList() {
@@ -218,7 +305,6 @@ function ScriptsList() {
         createScriptSubmit("Short Position Send Buy", "if (Position(MYUSER) is short) SendBuyOrder(order)", "We do not accept to be short for some type of instruments", "Jean Baptiste"),
     ]);
 
-
     const [selectedScript, onSelectedScript] = useState(null);
 
     const handleScriptCreation = () => {
@@ -227,24 +313,40 @@ function ScriptsList() {
     };
 
     return (
-        <div className="w-75 h-screen">
-            <PanelGroup autoSaveId="example" direction="horizontal">
+        <div style={{ height: "100%" }}>
+            <PanelGroup autoSaveId="scripts" direction="horizontal">
 
-                <Panel defaultSize={25}>
-                    <div style={{ minHeight: 600 }} className="listlayout w-75">
-                        <List AlgoScripList={scriptList} onSelectedScript={onSelectedScript} />
-                    </div>
-                    <div>
-                        <Button onClick={handleScriptCreation}>
-                            Create a new script
-                        </Button>
+                <Panel defaultSize={22} minSize={15}>
+                    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                        <div style={{ flex: 1, overflow: "hidden" }}>
+                            <List
+                                AlgoScripList={scriptList}
+                                selectedScript={selectedScript}
+                                onSelectedScript={onSelectedScript}
+                            />
+                        </div>
+                        <div style={{
+                            padding: "0 12px 12px",
+                            backgroundColor: "#111827",
+                        }}>
+                            <Button onClick={handleScriptCreation} theme="blue" style={{ width: "100%" }}>
+                                + New Script
+                            </Button>
+                        </div>
                     </div>
                 </Panel>
 
-                <PanelResizeHandle className="w-2 bg-blue-300 hover:bg-blue-500 transition-colors duration-200 cursor-col-resize" />
+                <PanelResizeHandle style={{
+                    width: "4px",
+                    backgroundColor: "#1f2937",
+                    cursor: "col-resize",
+                    transition: "background-color 200ms",
+                }}
+                    className="hover:bg-blue-500"
+                />
 
                 <Panel>
-                    <AlgoScript selectedScript={selectedScript} setScriptList={setScriptList} scriptList={scriptList}  />
+                    <AlgoScript selectedScript={selectedScript} setScriptList={setScriptList} scriptList={scriptList} />
                 </Panel>
 
             </PanelGroup>

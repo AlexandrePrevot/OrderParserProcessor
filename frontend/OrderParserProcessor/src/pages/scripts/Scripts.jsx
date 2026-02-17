@@ -2,10 +2,8 @@ import ScriptsList from "./ScriptsList";
 
 function Scripts() {
     return (
-        <div className="w-screen h-screen">
-            <div>
-                <ScriptsList />
-            </div>
+        <div className="w-full h-screen bg-gray-950">
+            <ScriptsList />
         </div>
     );
 }
