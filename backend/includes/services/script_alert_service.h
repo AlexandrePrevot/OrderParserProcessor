@@ -1,3 +1,5 @@
+#pragma once
+
 #include <grpcpp/grpcpp.h>
 #include "services/script_to_api.grpc.pb.h"
 

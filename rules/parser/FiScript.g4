@@ -7,6 +7,7 @@ statement
     | reacton
     | print
     | alert
+    | sendorder
     | if
     | variableDeclaration
     | variableAssignment
@@ -16,6 +17,7 @@ schedule   : SCHEDULE argumentList block NEWLINE* ;
 reacton   : REACTON argumentList block NEWLINE* ;
 print   : PRINT '(' expression ')' NEWLINE* ;
 alert   : ALERT '(' expression ')' NEWLINE* ;
+sendorder : SENDORDER '(' expression ',' expression ',' expression ')' NEWLINE* ;
 if   : 'if' '(' expression ')' block ('else' 'if' '(' expression ')' block)* ('else' block)? NEWLINE* ;
 
 variableDeclaration : IDENTIFIER '=' expression NEWLINE* ;
@@ -54,6 +56,7 @@ SCHEDULE : 'Schedule' ;
 REACTON : 'ReactOn' ;
 PRINT : 'Print' ;
 ALERT : 'Alert' ;
+SENDORDER : 'SendOrder' ;
 BOOL_LITERAL : 'True' | 'False' ;
 COMPOUND_OP : '+=' | '-=' | '*=' | '/=' ;
 IDENTIFIER : [a-zA-Z_.][a-zA-Z0-9_.]* ;
