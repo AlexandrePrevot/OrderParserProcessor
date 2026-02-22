@@ -75,10 +75,12 @@ class ScriptToApiServicer(services.script_to_api_pb2_grpc.ScriptToApiServicer):
         data['script_title'] = request.script_title
         data['user'] = request.user
         data['message'] = request.message
+        data['priority'] = 'HIGH' if request.priority == 1 else 'MID'
         print("Received ScriptAlert:")
         print(f"Script Title: {request.script_title}")
         print(f"User: {request.user}")
         print(f"Message: {request.message}")
+        print(f"Priority: {data['priority']}")
         str_data = json.dumps(data)
 
         await self.notif_callback(str_data)

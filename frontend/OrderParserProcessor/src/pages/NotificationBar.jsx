@@ -23,7 +23,9 @@ function NotificationItem({ notification, onRemove, isNew }) {
             className="p-3 rounded mb-2 relative"
             style={{
                 animation: isNew ? 'slideIn 0.3s ease-out' : 'none',
-                backgroundColor: isNew ? '#1e3a5f' : '#1f2937',
+                backgroundColor: notification.priority === 'HIGH'
+                    ? (isNew ? '#7f1d1d' : '#3b0f0f')
+                    : (isNew ? '#1e3a5f' : '#1f2937'),
                 transition: 'background-color 0.5s ease',
             }}
         >

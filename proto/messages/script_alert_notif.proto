@@ -4,10 +4,16 @@ package internal;
 
 import "google/protobuf/timestamp.proto";
 
+enum Priority {
+    MID = 0;
+    HIGH = 1;
+}
+
 message ScriptAlertNotif {
     string message = 1;
     string script_title = 2;
     string user = 3;
     google.protobuf.Timestamp creation_time = 4;
+    Priority priority = 5;
 }
 
