@@ -29,6 +29,7 @@ private:
   bool MakePrintCommand(const Command &command);
   bool MakeAlertCommand(const Command &command);
   bool MakeReactOnCommand(const Command &command);
+  bool MakeSendOrderCommand(const Command &command);
   bool MakeIfCommand(const Command &command);
   bool MakeVariableDeclaration(const Command &command);
   bool MakeVariableAssignment(const Command &command);

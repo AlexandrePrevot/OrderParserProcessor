@@ -54,10 +54,11 @@ struct ParenExprNode : ExprNode {
 };
 
 struct Command {
-  enum CommandType { Schedule, ReactOn, Print, Alert, VariableDeclaration, VariableAssignment, If };
+  enum CommandType { Schedule, ReactOn, Print, Alert, VariableDeclaration, VariableAssignment, SendOrder, If };
 
   CommandType type;
   std::vector<std::string> arguments;
+  std::vector<std::shared_ptr<ExprNode>> arguments_expr;
   std::vector<Command> in_scope;
 
   std::string variable_name;

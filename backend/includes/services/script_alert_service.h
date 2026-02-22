@@ -1,3 +1,5 @@
+#pragma once
+
 #include <grpcpp/grpcpp.h>
 #include "services/script_to_api.grpc.pb.h"
 
@@ -11,7 +13,7 @@ public:
   ScriptAlertService(ScriptAlertService &&) = delete;
   ScriptAlertService &operator=(ScriptAlertService &&) = delete;
 
-  void SendAlert(const std::string &message);
+  void SendAlert(const std::string &message, internal::Priority priority);
 
 
 private:

@@ -149,6 +149,8 @@ bool FileMaker::MakeLine(const Command &command) {
     return MakeAlertCommand(command);
   case Type::ReactOn:
     return MakeReactOnCommand(command);
+  case Type::SendOrder:
+    return MakeSendOrderCommand(command);
   case Type::If:
     return MakeIfCommand(command);
   case Type::VariableDeclaration:
@@ -318,7 +320,7 @@ bool FileMaker::MakeAlertCommand(const Command &command) {
 
 
   std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
-  InsertCode(std::string("script_alert_service.SendAlert(") + expr_code + ");",
+  InsertCode(std::string("script_alert_service.SendAlert(") + expr_code + ", internal::Priority::MID);",
              tab);
 
   return true;
@@ -380,6 +382,40 @@ bool FileMaker::MakeReactOnCommand(const Command &command) {
   MakeBlock(command.in_scope);
 
   InsertCode("});", tab);
+
+  return true;
+}
+
+bool FileMaker::MakeSendOrderCommand(const Command &command) {
+  if (command.arguments_expr.size() != 3) {
+    std::cout << "SendOrder command requires 3 arguments" << std::endl;
+    return false;
+  }
+
+  std::cout << "adding the send order command" << std::endl;
+
+  // for the moment the SendOrder command
+  // will only update the FE with the new order
+  // so thats a hidden alert
+
+  std::string arg1 = GenerateExpressionCode(command.arguments_expr[0].get(),
+                                            VariableType::String);
+  std::string arg2 = GenerateExpressionCode(command.arguments_expr[1].get(),
+                                            VariableType::String);
+  std::string arg3 = GenerateExpressionCode(command.arguments_expr[2].get(),
+                                            VariableType::String);
+
+  long tab = code_it_->first;
+  AddAlertService(command);
+
+  const std::string order_info = "std::string(\"Order created: Name : \") + " +
+                                 arg1 + " + std::string(\", Quantity : \") + " +
+                                 arg2 + " + std::string(\", Price : \") + " +
+                                 arg3;
+
+  InsertCode(std::string("script_alert_service.SendAlert(") + order_info +
+                 ", internal::Priority::HIGH);",
+             tab);
 
   return true;
 }
@@ -699,7 +735,12 @@ void FileMaker::AddReactOnService(const Command &command) {
 }
 
 void FileMaker::Include(const Command &command) {
-  if (history_.find(command.type) != std::cend(history_))
+  auto type = command.type;
+  if (command.type == Command::SendOrder) {
+    // because SendOrder also needs the AlertService (yet)
+    type = Command::Alert;
+  }
+  if (history_.find(type) != std::cend(history_))
     return;
 
   using Type = Command::CommandType;
@@ -711,6 +752,7 @@ void FileMaker::Include(const Command &command) {
     InsertInclude("<iostream>", false);
     break;
   case Type::Alert:
+  case Type::SendOrder:
     InsertInclude("\"services/script_alert_service.h\"", true);
     break;
   case Type::ReactOn:
@@ -720,7 +762,7 @@ void FileMaker::Include(const Command &command) {
     break;
   }
 
-  history_.insert(command.type);
+  history_.insert(type);
 }
 
 void FileMaker::ProcessCommandsForManagers(const std::vector<Command> &commands) {
@@ -733,7 +775,8 @@ void FileMaker::ProcessCommandsForManagers(const std::vector<Command> &commands)
     } else if (sub_command.type == Type::ReactOn) {
       active_managers_.insert(Type::ReactOn);
       AddReactOnService(sub_command);
-    } else if (sub_command.type == Type::Alert) {
+    } else if (sub_command.type == Type::Alert ||
+               sub_command.type == Type::SendOrder) {
       active_managers_.insert(Type::Alert);
       AddAlertService(sub_command);
     }

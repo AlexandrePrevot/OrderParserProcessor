@@ -27,6 +27,8 @@ private:
 
   virtual std::any visitAlert(FiScriptParser::AlertContext *context);
 
+  virtual std::any visitSendorder(FiScriptParser::SendorderContext *context);
+
   virtual std::any visitIf(FiScriptParser::IfContext *context);
 
   virtual std::any visitVariableDeclaration(FiScriptParser::VariableDeclarationContext *context);

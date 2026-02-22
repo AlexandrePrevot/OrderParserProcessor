@@ -28,6 +28,7 @@ function MainLayout() {
                 message: obj.message,
                 user: obj.user,
                 script_title: obj.script_title,
+                priority: obj.priority,
                 timestamp: new Date(),
             };
             setNotifications(prev => [newNotification, ...prev]);

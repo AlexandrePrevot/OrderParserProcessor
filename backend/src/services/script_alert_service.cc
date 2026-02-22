@@ -14,7 +14,7 @@ ScriptAlertService::ScriptAlertService() {
 
 ScriptAlertService::~ScriptAlertService() = default;
 
-void ScriptAlertService::SendAlert(const std::string &message) {
+void ScriptAlertService::SendAlert(const std::string &message, internal::Priority priority) {
   grpc::ClientContext context;
   internal::ScriptAlertNotif request;
   google::protobuf::Empty response;
@@ -23,6 +23,7 @@ void ScriptAlertService::SendAlert(const std::string &message) {
   request.set_user(script_info.GetUsername());
   request.set_message(message);
   request.set_script_title(script_info.GetScriptTitle());
+  request.set_priority(priority);
 
   *request.mutable_creation_time() =
       google::protobuf::util::TimeUtil::GetCurrentTime();
