@@ -13,7 +13,7 @@ public:
   ScriptAlertService(ScriptAlertService &&) = delete;
   ScriptAlertService &operator=(ScriptAlertService &&) = delete;
 
-  void SendAlert(const std::string &message);
+  void SendAlert(const std::string &message, internal::Priority priority);
 
 
 private:

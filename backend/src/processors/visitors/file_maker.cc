@@ -320,7 +320,7 @@ bool FileMaker::MakeAlertCommand(const Command &command) {
 
 
   std::string expr_code = GenerateExpressionCode(command.expression.get(), VariableType::String);
-  InsertCode(std::string("script_alert_service.SendAlert(") + expr_code + ");",
+  InsertCode(std::string("script_alert_service.SendAlert(") + expr_code + ", internal::Priority::MID);",
              tab);
 
   return true;
@@ -413,8 +413,9 @@ bool FileMaker::MakeSendOrderCommand(const Command &command) {
                                  arg2 + " + std::string(\", Price : \") + " +
                                  arg3;
 
-  InsertCode(
-      std::string("script_alert_service.SendAlert( ") + order_info + ");", tab);
+  InsertCode(std::string("script_alert_service.SendAlert(") + order_info +
+                 ", internal::Priority::HIGH);",
+             tab);
 
   return true;
 }
@@ -761,7 +762,7 @@ void FileMaker::Include(const Command &command) {
     break;
   }
 
-  history_.insert(command.type);
+  history_.insert(type);
 }
 
 void FileMaker::ProcessCommandsForManagers(const std::vector<Command> &commands) {
