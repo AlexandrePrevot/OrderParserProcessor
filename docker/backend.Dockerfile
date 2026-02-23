@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     libabsl-dev \
     libc-ares-dev \
     libre2-dev \
+    nlohmann-json3-dev \
+    libboost-all-dev \
     openjdk-17-jre-headless \
     wget
 
@@ -85,6 +87,7 @@ RUN /opt/grpc_install/bin/protoc -I$ORDER_PARSER_PROCESSOR_ROOT/proto/messages -
 COPY CMakeLists.txt /app/
 COPY cmake /app/cmake/
 COPY backend /app/backend/
+COPY connectivity /app/connectivity/
 
 WORKDIR /app/build
 
