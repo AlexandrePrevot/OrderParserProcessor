@@ -7,7 +7,7 @@ package internal;
 
 
 service MarketDataService {
-    // Client calls this once and then receives a continuous stream
+    // Client calls this once and then receives a continuou stream
     rpc StreamPrices(google.protobuf.Empty)
         returns (stream PriceUpdate);
 }
