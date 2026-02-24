@@ -1,4 +1,5 @@
 # FiScript
+[![Build C++ Backend](https://github.com/AlexandrePrevot/OrderParserProcessor/actions/workflows/backend.yml/badge.svg)](https://github.com/AlexandrePrevot/OrderParserProcessor/actions/workflows/backend.yml)
 
 A simple scripting language that transpiles to isolated C++ projects dedicated to trading.
 
