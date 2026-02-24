@@ -60,12 +60,19 @@ This means:
 ### Statements
 
 ```
-Schedule(09:30:00) {
+// this will send an order every 10 seconds
+// 50 times
+Schedule(Start, 10s, 50) {
     SendOrder("AAPL", 100, 182.5)
 }
 
-ReactOn(PriceUpdate, AAPL) {
-    if (price > 180) {
+// automatically subscribes to the market-data distributor
+// listen to price updates for instrument "AAPL"
+// if the price of the quote (price_update) is above
+// 180, it first notifies the user
+// then sends an Order on this instrument at this price
+ReactOn("AAPL", 50) {
+    if (quote.price > 180) {
         Alert("Price threshold reached")
         SendOrder("AAPL", 50, price)
     }
@@ -74,21 +81,14 @@ ReactOn(PriceUpdate, AAPL) {
 
 | Statement | Description |
 |---|---|
-| `Schedule(time) { }` | Execute a block at a scheduled time |
-| `ReactOn(event, args) { }` | Execute a block when a market event fires |
-| `SendOrder(ticker, qty, price)` | Place an order (triggers a HIGH priority alert) |
-| `Alert(message)` | Send a notification to the frontend (MID priority) |
-| `Print(expression)` | Debug output |
+| `Schedule(Start, x, iterations) { }` | Execute a block every x seconds, iterations times |
+| `ReactOn(instrumentID, iterations) { }` | Execute a block when a market event fires, iterations times |
+| `SendOrder(ticker, qty, price)` | Place an order |
+| `Alert(message)` | Send a notification to the frontend |
+| `Print(expression)` | Debug output, used by developpers |
 | `if / else if / else` | Conditional logic |
 | `x = expression` | Variable declaration |
 | `x += expression` | Compound assignment (`+=` `-=` `*=` `/=`) |
-
-### Expressions
-
-- Arithmetic: `+` `-` `*` `/`
-- Comparison: `>` `<` `>=` `<=` `==` `!=`
-- Logical: `and` `or`
-- Types: numbers (`42`, `3.14`), strings (`"AAPL"`), booleans (`True`, `False`)
 
 Full grammar: [rules/parser/FiScript.g4](rules/parser/FiScript.g4)
 
@@ -101,33 +101,19 @@ export ORDER_PARSER_PROCESSOR_ROOT="/path/to/OrderParserProcessor"
 export ANTLR_VERSION="antlr-4.13.0"
 ```
 
-### Start Everything
-
-```bash
-sudo apt install tmux   # first time only
-./setuptmux.sh          # starts all 4 services in a tmux session
-```
-
-### Build C++ Backend Only
-
-```bash
-cmake -B build
-cmake --build build
-```
-
-### Build with Tests
-
-```bash
-cmake -B build -DBUILD_TESTS=ON
-cmake --build build
-ctest --test-dir build
-```
-
 ### Docker (CI / isolated build)
 
+## Frontend
+
+npm run dev on the frontend
+
+## Backend/Backend-API
 ```bash
-sudo docker build -f docker/backend.Dockerfile -t fiscript .
+sudo docker compose up
 ```
+Note : dockerfiles and TMUX are not completly ready yet.
+But you can find all the backend/backend-api dependencies
+in the dockerfiles
 
 ## Project Structure
 
@@ -136,14 +122,14 @@ OrderParserProcessor/
 ├── backend/                # C++ gRPC server — parses FiScript, generates code
 │   ├── src/
 │   │   ├── services/       # gRPC service implementations
-│   │   ├── processors/     # Script processing pipeline
+│   │   ├── processors/     # processing pipeline
 │   │   ├── handlers/       # Request handlers
 │   │   └── visitors/       # ANTLR visitor (transpiler)
 │   └── includes/
 ├── backend-api/            # Python FastAPI — orchestration layer
 │   ├── core/
 │   │   ├── communication/  # gRPC clients/servers (communicator.py)
-│   │   └── process_manager.py  # Start/stop script processes
+│   │   └── process_manager.py  # manages script processes
 │   └── routes/views.py
 ├── connectivity/           # C++ Distributor — market data gRPC server
 ├── frontend/               # React + Vite frontend
@@ -199,7 +185,7 @@ python3 -m grpc_tools.protoc \
 
 Grammar is in [rules/parser/FiScript.g4](rules/parser/FiScript.g4). CMake regenerates the ANTLR parser automatically on build.
 
-For rapid iteration without a full recompile:
+If you want to see the AST
 
 ```bash
 antlr4 -Dlanguage=Cpp -visitor rules/parser/FiScript.g4
