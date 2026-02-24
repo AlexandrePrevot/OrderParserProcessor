@@ -3,6 +3,8 @@
 
 A simple scripting language that transpiles to isolated C++ projects dedicated to trading.
 
+![FiScript demo](images/FiScript.gif)
+
 ## The Problem
 
 Building a trading system typically requires C++ experts, tight coordination between quant and engineering teams, and diving into a large sensitive codebase every time a client needs a new behaviour. Miscommunication is frequent, changes are slow, and a bug in one strategy can threaten the rest of the system.

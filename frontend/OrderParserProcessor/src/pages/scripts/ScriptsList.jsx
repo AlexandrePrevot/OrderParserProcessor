@@ -300,9 +300,6 @@ function AlgoScript({ selectedScript, setScriptList, scriptList }) {
 function ScriptsList() {
 
     const [scriptList, setScriptList] = useState([
-        createScriptSubmit("Low Price trigger", "if (price is low) SendBuyOrder(order)", "when the price is low, it will send a buy order", "Jean Baptiste "),
-        createScriptSubmit("High Price trigger", "if (price is high) SendSellOrder(order)", "when the price is high, it will send a sell order", "Jean Baptiste"),
-        createScriptSubmit("Short Position Send Buy", "if (Position(MYUSER) is short) SendBuyOrder(order)", "We do not accept to be short for some type of instruments", "Jean Baptiste"),
     ]);
 
     const [selectedScript, onSelectedScript] = useState(null);
