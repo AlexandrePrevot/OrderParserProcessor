@@ -1,0 +1,25 @@
+# git
+.git
+.gitignore
+
+# artefacts de build locaux
+build/
+output_bin/
+generated/
+
+# éditeurs / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# docker lui-même
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# divers
+*.o
+*.a
+*.log
+README.md
